@@ -1,0 +1,5 @@
+import serial
+import lib1785b
+ser = serial.Serial("/dev/ttyUSB0") # "/dev/ttyUSB0", "com2" etc...
+#should define the serial as the port connected to ALDO supply
+lib1785b.remoteMode(True, ser)
