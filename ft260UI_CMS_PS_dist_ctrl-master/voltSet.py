@@ -7,12 +7,11 @@ ser = serial.Serial("/dev/ttyUSB0") # "/dev/ttyUSB0", "com2" etc...
 #should define the serial as the port connected to ALDO supply
 lib1785b.remoteMode(True, ser)
 
-def volt(voltage, time=5):
-    print("Setting voltage to " + voltage + "V")
+def volt(voltage, t=5):
+    print("Setting voltage to " + str(voltage) + "V")
     dt = 0.25 #length of time for each step in seconds
     data = lib1785b.readAll(ser)
     v0 = float(data['vset'])
-    t = float(time) if len(args) > 3 else 5
     if t == 0:
         t = dt
     v1 = float(voltage)
@@ -28,8 +27,9 @@ def volt(voltage, time=5):
     lib1785b.volt(v1, ser)
 
 args = sys.argv
-if args[1]=="volt":
-    volt(args[2], args[3])
+if (len(args) >= 3):
+    if args[1]=="volt":
+        volt(float(args[2]), float(args[3]))
 else:
-    print("Command must be in the format: \n (sudo) python voltSet.py command [arguments]\n List of commands: volt [voltage] [time]")
+    print("Command must be in the format: \n (sudo) python voltSet.py command [arguments]\n List of commands: [voltage] [time]")
 

@@ -8,8 +8,8 @@ import tkinter.ttk as ttk
 import tkinter.scrolledtext as tkst
 from tkinter import font
 
-import lib1785b as aldoPS
-import voltSet
+import lib1785b
+from voltSet import volt
 
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
@@ -518,7 +518,7 @@ class _PSDistCtrlFrame(tk.Frame):
             btn_text = "OFF"
             col = 1
         btn = tk.Button(self, text=btn_text, command=lambda: self.ru_on_off(on, ps, ru))
-        btn.grid(row=4+ru, column=1+col+self.main_col*ps, sticky="nsew")
+        btn.grid(row=5+ru, column=1+col+self.main_col*ps, sticky="nsew")
 
     def add_status_msg(self, lvl, msg):
         self.status_msg_text.configure(state="normal")
@@ -536,6 +536,13 @@ class _PSDistCtrlFrame(tk.Frame):
     def msg_error(self, msg):
         self.add_status_msg("ERROR", msg)
 
+    def setAldoVolt():
+        inp = float(voltInp.get())
+        if inp <= 50:
+            volt(inp, 5)
+        else:
+            print("Voltage cannot be set higher than 50")
+        
     def __init__(self, parent, config):
         self.parent = parent
         self.conf = config
@@ -569,7 +576,9 @@ class _PSDistCtrlFrame(tk.Frame):
             self.status_ru.append([])
             for i in range(self.ru_n+1):
                 self.label_ru[j].append(tk.Label(self, text=row_str[i]))
-                self.label_ru[j][-1].grid(row=4+i, column=0+j*self.main_col, sticky="nsew")
+                
+                # self.label_ru[j][-1].grid(row=4+i, column=0+j*self.main_col, sticky="nsew")
+                self.label_ru[j][-1].grid(row=5+i, column=0+j*self.main_col, sticky="nsew")
                 self.btn(True, j, i)
                 self.btn(False, j, i)
                 if i == 0:
@@ -579,26 +588,39 @@ class _PSDistCtrlFrame(tk.Frame):
                     str_status = "Unknown"
                     bg = 'orange'
                 self.status_ru[j].append(tk.Label(self, text=str_status, background=bg))
-                self.status_ru[j][-1].grid(row=4+i, column=3+self.main_col*j, sticky="nsew")
+                self.status_ru[j][-1].grid(row=5+i, column=3+self.main_col*j, sticky="nsew")
 
         self.button_init.grid(row=0, column=0, columnspan=self.main_col, sticky="nsew")
         label_init_status.grid(row=1, column=0, columnspan=2, sticky="nsew")
         self.init_status.grid(row=1, column=2, columnspan=2, sticky="nsew")
 
         label_all = tk.Label(self, text="ALL PS&RU")
-        label_all.grid(row=2, column=0, sticky="nsew")
+        label_all.grid(row=3, column=0, sticky="nsew")
         button_all_on = tk.Button(self, text="ON", command=lambda: self.ru_all_on_off(True))
-        button_all_on.grid(row=2, column=1, sticky="nsew")
+        button_all_on.grid(row=3, column=1, sticky="nsew")
         button_all_off = tk.Button(self, text="OFF", command=lambda: self.ru_all_on_off(False))
-        button_all_off.grid(row=2, column=2, sticky="nsew")
+        button_all_off.grid(row=3, column=2, sticky="nsew")
 
         label_b_pol.grid(row=3, column=0, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
         label_tec.grid(row=3, column=self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
         label_aldo.grid(row=3, column=2*self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
 
-        button_ramp_up = tk.Button(self, text="ON", command=lambda: voltSet.volt(0, 5))
-        button_ramp_up.grid(row=10,col=2*self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
+# -----------------------------------------------------------------------------------------------------------
 
+        label_ramp = tk.Label(self, text="ALDO Voltage")
+        label_ramp.grid(row=4, column=2*self.main_col, sticky="nsew")
+
+        #button_ramp_off = tk.Button(self, text="OFF", command=lambda: volt(0, 5))
+        #button_ramp_off.grid(row=4, column=2*self.main_col+1, sticky="nsew")
+        
+        voltInp = tk.Text(self, width=1, height=1, pady=1)
+        voltInp.grid(row=4, column=2*self.main_col+1, sticky="nsew")
+        
+        button_ramp_up = tk.Button(self, text="SET", command = lambda: volt(float(voltInp.get("1.0", "end-1c")), 5))
+        button_ramp_up.grid(row=4, column=2*self.main_col+2, sticky="nsew")
+                
+# -----------------------------------------------------------------------------------------------------------
+        
         self.status_msg_text.grid(
             row=0, column=self.main_col, columnspan=2*self.main_col, rowspan=3, sticky="nsew", padx=5)
 
