@@ -8,6 +8,9 @@ import tkinter.ttk as ttk
 import tkinter.scrolledtext as tkst
 from tkinter import font
 
+import lib1785b as aldoPS
+import voltSet
+
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
 
@@ -592,6 +595,9 @@ class _PSDistCtrlFrame(tk.Frame):
         label_b_pol.grid(row=3, column=0, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
         label_tec.grid(row=3, column=self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
         label_aldo.grid(row=3, column=2*self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
+
+        button_ramp_up = tk.Button(self, text="ON", command=lambda: voltSet.volt(0, 5))
+        button_ramp_up.grid(row=10,col=2*self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
 
         self.status_msg_text.grid(
             row=0, column=self.main_col, columnspan=2*self.main_col, rowspan=3, sticky="nsew", padx=5)
