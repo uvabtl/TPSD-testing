@@ -14,7 +14,7 @@ def spdQuery(ser, cmd):
     ser.write(cmd.encode())
     while(notDone):
         r = ser.read_until(expected=b'\r')
-        print(r.decode())
+        r.decode()
         if(not(len(r) > 0)):
            notDone = False
         else:
@@ -29,7 +29,7 @@ def setCurrent(ser, value):
 def setVoltage(ser, value):
     """Set the voltage. Val is a number in normal format. i.e. 1.0 = 1.0 V"""
     val = int(value*voltMult)
-    print(spdWrite(ser, "VOLT%03d\r"%val))
+    spdWrite(ser, "VOLT%03d\r"%val)
 
 def setComm(port, addr):
     """Port is 0 for USB/RS-232 and 1 for RS-485. Address 0-255"""
@@ -59,8 +59,10 @@ def getData(ser):
     return [int(resp[0][0:3])/10., int(resp[0][4:7])/10., int(chr(resp[0][8]))]
 
 def getSettings(ser):
-    """Get the current, voltage and state. Response is an array: [0] - Current, [1] - Voltage"""
+    """Get the current, voltage and state. Response is an array: [0] - Current, [1] - Voltage""" #It isn't -- the voltage is getSettings(ser)[0]
     resp = spdQuery(ser, "GETS\r")
-    print(resp)
+    #print(resp)
     return [int(resp[0][0:3])/10., int(resp[0][3:6])/10.]
     
+def onOff(ser, state): #0 for on, 1 for off
+    resp = spdWrite(ser, "SOUT%1d\r"%state)

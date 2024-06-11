@@ -9,8 +9,10 @@ import tkinter.scrolledtext as tkst
 from tkinter import font
 
 import lib1785b
-from aldoControl import volt
-
+#import lib1685b
+import aldoControl
+#import tecControl
+#import bpolControl
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
 
@@ -539,9 +541,16 @@ class _PSDistCtrlFrame(tk.Frame):
     def setAldoVolt():
         inp = float(voltInpALDO.get())
         if inp <= 50:
-            volt(inp, 5)
+            aldoControl.volt(inp, 5)
         else:
-            print("Voltage cannot be set higher than 50")
+            print("ALDO voltage cannot be set higher than 50")
+
+    def setTecVolt():
+        inp = float(voltInpTEC.get())
+        if inp <= 36:
+            tecControl.volt(inp, 5)
+        else:
+            print("TEC voltage cannot exceed 36")
         
     def __init__(self, parent, config):
         self.parent = parent
@@ -607,22 +616,22 @@ class _PSDistCtrlFrame(tk.Frame):
 
 # -----------------------------------------------------------------------------------------------------------
 
-        label_bPOL_ramp = tk.Label(self, text="bPOL Voltage", background="orange")
+        label_bPOL_ramp = tk.Label(self, text="bPOL Voltage")
         label_bPOL_ramp.grid(row=4, column=0, sticky="nsew")
 
         voltInpbPOL = tk.Text(self, width=1, height=1, pady=1)
         voltInpbPOL.grid(row=4, column=1, sticky="nsew")
 
-        button_bPOL_ramp = tk.Button(self, text="SET", command = lambda: print("Not yet implemented"))
+        button_bPOL_ramp = tk.Button(self, text="SET", command = lambda: bpolControl.volt(float(voltInpbPOL.get("1.0", "end-1c")), 5))
         button_bPOL_ramp.grid(row=4, column=2, sticky="nsew")
 
-        label_TEC_ramp = tk.Label(self, text="TEC Voltage", background="orange")
+        label_TEC_ramp = tk.Label(self, text="TEC Voltage")
         label_TEC_ramp.grid(row=4, column=self.main_col, sticky="nsew")
 
         voltInpTEC = tk.Text(self, width=1, height=1, pady=1)
         voltInpTEC.grid(row=4, column=self.main_col+1, sticky="nsew")
 
-        button_TEC_ramp = tk.Button(self, text="SET", command = lambda: print("Not yet implemented"))
+        button_TEC_ramp = tk.Button(self, text="SET", command = lambda: tecControl.volt(float(voltInpTEC.get("1.0", "end-1c")), 5))
         button_TEC_ramp.grid(row=4, column=self.main_col+2, sticky="nsew")
 
         label_ALDO_ramp = tk.Label(self, text="ALDO Voltage")
@@ -631,7 +640,7 @@ class _PSDistCtrlFrame(tk.Frame):
         voltInpALDO = tk.Text(self, width=1, height=1, pady=1)
         voltInpALDO.grid(row=4, column=2*self.main_col+1, sticky="nsew")
         
-        button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: volt(float(voltInpALDO.get("1.0", "end-1c")), 5))
+        button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: aldoControl.volt(float(voltInpALDO.get("1.0", "end-1c")), 5))
         button_ALDO_ramp.grid(row=4, column=2*self.main_col+2, sticky="nsew")
                 
 # -----------------------------------------------------------------------------------------------------------
