@@ -9,7 +9,7 @@ import tkinter.scrolledtext as tkst
 from tkinter import font
 
 import lib1785b
-from voltSet import volt
+from aldoControl import volt
 
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
@@ -537,7 +537,7 @@ class _PSDistCtrlFrame(tk.Frame):
         self.add_status_msg("ERROR", msg)
 
     def setAldoVolt():
-        inp = float(voltInp.get())
+        inp = float(voltInpALDO.get())
         if inp <= 50:
             volt(inp, 5)
         else:
