@@ -607,17 +607,32 @@ class _PSDistCtrlFrame(tk.Frame):
 
 # -----------------------------------------------------------------------------------------------------------
 
-        label_ramp = tk.Label(self, text="ALDO Voltage")
-        label_ramp.grid(row=4, column=2*self.main_col, sticky="nsew")
+        label_bPOL_ramp = tk.Label(self, text="bPOL Voltage", background="orange")
+        label_bPOL_ramp.grid(row=4, column=0, sticky="nsew")
 
-        #button_ramp_off = tk.Button(self, text="OFF", command=lambda: volt(0, 5))
-        #button_ramp_off.grid(row=4, column=2*self.main_col+1, sticky="nsew")
+        voltInpbPOL = tk.Text(self, width=1, height=1, pady=1)
+        voltInpbPOL.grid(row=4, column=1, sticky="nsew")
+
+        button_bPOL_ramp = tk.Button(self, text="SET", command = lambda: print("Not yet implemented"))
+        button_bPOL_ramp.grid(row=4, column=2, sticky="nsew")
+
+        label_TEC_ramp = tk.Label(self, text="TEC Voltage", background="orange")
+        label_TEC_ramp.grid(row=4, column=self.main_col, sticky="nsew")
+
+        voltInpTEC = tk.Text(self, width=1, height=1, pady=1)
+        voltInpTEC.grid(row=4, column=self.main_col+1, sticky="nsew")
+
+        button_TEC_ramp = tk.Button(self, text="SET", command = lambda: print("Not yet implemented"))
+        button_TEC_ramp.grid(row=4, column=self.main_col+2, sticky="nsew")
+
+        label_ALDO_ramp = tk.Label(self, text="ALDO Voltage")
+        label_ALDO_ramp.grid(row=4, column=2*self.main_col, sticky="nsew")
+
+        voltInpALDO = tk.Text(self, width=1, height=1, pady=1)
+        voltInpALDO.grid(row=4, column=2*self.main_col+1, sticky="nsew")
         
-        voltInp = tk.Text(self, width=1, height=1, pady=1)
-        voltInp.grid(row=4, column=2*self.main_col+1, sticky="nsew")
-        
-        button_ramp_up = tk.Button(self, text="SET", command = lambda: volt(float(voltInp.get("1.0", "end-1c")), 5))
-        button_ramp_up.grid(row=4, column=2*self.main_col+2, sticky="nsew")
+        button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: volt(float(voltInpALDO.get("1.0", "end-1c")), 5))
+        button_ALDO_ramp.grid(row=4, column=2*self.main_col+2, sticky="nsew")
                 
 # -----------------------------------------------------------------------------------------------------------
         

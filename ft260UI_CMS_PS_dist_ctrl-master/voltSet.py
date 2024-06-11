@@ -20,16 +20,9 @@ def volt(voltage, t=5):
     newV = v0
     
     print("v0 = " + str(v0) + "\nSteps: " + str(nt) + " over " + str(t) + " seconds")
+    lib1785b.outputOn(True, ser) #Turns on the output
     for i in range(int(nt)):
         newV = newV + dv
         lib1785b.volt(newV, ser)
         time.sleep(dt)
     lib1785b.volt(v1, ser)
-
-args = sys.argv
-if (len(args) >= 3):
-    if args[1]=="volt":
-        volt(float(args[2]), float(args[3]))
-else:
-    print("Command must be in the format: \n (sudo) python voltSet.py command [arguments]\n List of commands: [voltage] [time]")
-
