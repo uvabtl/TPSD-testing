@@ -50,10 +50,6 @@ The GUI is built with tkinter library.
 * `pip install smbus2` (Linux only)
 * `python ftI2cGui.py`
 
-## GUI example
-
-  ![ftI2cGui](img/ftI2cGui.png)
-
 ## Build standalone application
 
 * `pip install PyInstaller`
