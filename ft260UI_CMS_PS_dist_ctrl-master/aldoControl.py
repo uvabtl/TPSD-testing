@@ -3,6 +3,13 @@ import sys
 import lib1785b
 import time
 
+port = "/dev/ttyUSB0"
+ser = serial.Serial(port) # "/dev/ttyUSB0", "com2" etc...
+#should define the serial as the port connected to ALDO supply
+lib1785b.remoteMode(True, ser)
+# v0 = float(lib1785b.readAll(ser)['vset'])
+# stepVolt(ser, v0, 0, t=1, dt=0.25) #sets voltage to 0 on startup
+
 def stepVolt(ser, v0, v1, t=5, dt=0.25):
     nt = t/dt
     dv = (v1-v0)/nt
@@ -13,15 +20,11 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
         time.sleep(dt)
     lib1785b.volt(newV, ser)
 
-port = "/dev/ttyUSB0"
-ser = serial.Serial(port) # "/dev/ttyUSB0", "com2" etc...
-#should define the serial as the port connected to ALDO supply
-lib1785b.remoteMode(True, ser)
-# v0 = float(lib1785b.readAll(ser)['vset'])
-# stepVolt(ser, v0, 0, t=1, dt=0.25) #sets voltage to 0 on startup
-
+def waitUntilVolt(volt):
+    while not abs(float(lib1785b.readAll(ser)['vset']) - volt) <= 0.2:
+        time.sleep(0.05)
+    
 def volt(voltage, t=5):
-    print("Called")
     dt = 0.25 #length of time for each step in seconds
     data = lib1785b.readAll(ser)
     v0 = float(data['vset'])
@@ -35,12 +38,12 @@ def volt(voltage, t=5):
     elif v1 == v0:
         lib1785b.volt(v0, ser)
     elif v1 <= 0:
-        print("Setting voltage to 0V")
+        print("Setting ALDO voltage to 0V")
         stepVolt(ser, v0, v1, t, dt)
-        time.sleep(1)
+        waitUntilVolt(0)
         lib1785b.outputOn(False, ser)
     else:
-        print("Setting voltage to " + str(voltage) + "V")
+        print("Setting ALDO voltage to " + str(voltage) + "V")
         lib1785b.outputOn(True, ser)
         stepVolt(ser, v0, v1, t, dt)
 

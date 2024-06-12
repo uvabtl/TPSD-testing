@@ -9,7 +9,7 @@ import tkinter.scrolledtext as tkst
 from tkinter import font
 
 import lib1785b
-#import lib1685b
+import lib1685b
 import aldoControl
 #import tecControl
 #import bpolControl
@@ -608,55 +608,54 @@ class _PSDistCtrlFrame(tk.Frame):
         button_all_off = tk.Button(self, text="OFF", command=lambda: self.ru_all_on_off(False))
         button_all_off.grid(row=3, column=2, sticky="nsew")
 
-        label_b_pol.grid(row=3, column=0, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
-        label_tec.grid(row=3, column=self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
-        label_aldo.grid(row=3, column=2*self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
+        label_b_pol.grid(row=4, column=0, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
+        label_tec.grid(row=4, column=self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
+        label_aldo.grid(row=4, column=2*self.main_col, columnspan=self.main_col, padx=(3, 0), sticky="nsew")
 
 # -----------------------------------------------------------------------------------------------------------
 
         label_ramp_time = tk.Label(self, text="Ramp Time")
-        label_ramp_time.grid(row=3, column=3*self.main_col, sticky="nsew")
+        label_ramp_time.grid(row=4, column=3*self.main_col, sticky="nsew")
 
         ramp = tk.StringVar()
-        ramp_time_select = ttk.Combobox(self, width='5', justify='center', textvariable = ramp)
-        ramp_times = ('0.25', '0.5', '1.0', '2.5', '5.0', '10', '30')
+        ramp_time_select = ttk.Combobox(self, width='5', justify='center', textvariable = ramp, style="TCombobox")
+        ramp_times = ['0.25', '0.5', '1.0', '2.5', '5.0', '10', '30']
         ramp_time_select['values'] = ramp_times
-        ramp_time_select['state'] = 'readonly'
         ramp_time_select.current(4)
-        ramp_time_select.grid(row=4, column = 3*self.main_col, sticky="nsew")
+        ramp_time_select.grid(row=5, column = 3*self.main_col, sticky="new")
         ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
         
         label_bPOL_ramp = tk.Label(self, text="bPOL Voltage")
-        label_bPOL_ramp.grid(row=4, column=0, sticky="nsew")
+        label_bPOL_ramp.grid(row=5, column=0, sticky="nsew")
 
-        voltInpbPOL = tk.Text(self, width=1, height=1, pady=1)
-        voltInpbPOL.grid(row=4, column=1, sticky="nsew")
-
+        voltInpbPOL = tk.Text(self, width=1, height=1, pady=3, bd=3)
+        voltInpbPOL.grid(row=5, column=1, sticky="nsew")
+        
         button_bPOL_ramp = tk.Button(self, text="SET", command = lambda: bpolControl.volt(float(voltInpbPOL.get("1.0", "end-1c")), float(ramp.get())))
-        button_bPOL_ramp.grid(row=4, column=2, sticky="nsew")
+        button_bPOL_ramp.grid(row=5, column=2, sticky="nsew")
 
         label_TEC_ramp = tk.Label(self, text="TEC Voltage")
-        label_TEC_ramp.grid(row=4, column=self.main_col, sticky="nsew")
+        label_TEC_ramp.grid(row=5, column=self.main_col, sticky="nsew")
 
-        voltInpTEC = tk.Text(self, width=1, height=1, pady=1)
-        voltInpTEC.grid(row=4, column=self.main_col+1, sticky="nsew")
+        voltInpTEC = tk.Text(self, width=1, height=1, pady=3, bd=3)
+        voltInpTEC.grid(row=5, column=self.main_col+1, sticky="nsew")
 
         button_TEC_ramp = tk.Button(self, text="SET", command = lambda: tecControl.volt(float(voltInpTEC.get("1.0", "end-1c")), float(ramp.get())))
-        button_TEC_ramp.grid(row=4, column=self.main_col+2, sticky="nsew")
+        button_TEC_ramp.grid(row=5, column=self.main_col+2, sticky="nsew")
 
         label_ALDO_ramp = tk.Label(self, text="ALDO Voltage")
-        label_ALDO_ramp.grid(row=4, column=2*self.main_col, sticky="nsew")
+        label_ALDO_ramp.grid(row=5, column=2*self.main_col, sticky="nsew")
 
-        voltInpALDO = tk.Text(self, width=1, height=1, pady=1)
-        voltInpALDO.grid(row=4, column=2*self.main_col+1, sticky="nsew")
+        voltInpALDO = tk.Text(self, width=1, height=1, pady=3, bd=3)
+        voltInpALDO.grid(row=5, column=2*self.main_col+1, sticky="nsew")
         
         button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: aldoControl.volt(float(voltInpALDO.get("1.0", "end-1c")), float(ramp.get())))
-        button_ALDO_ramp.grid(row=4, column=2*self.main_col+2, sticky="nsew")
+        button_ALDO_ramp.grid(row=5, column=2*self.main_col+2, sticky="nsew")
                 
 # -----------------------------------------------------------------------------------------------------------
         
         self.status_msg_text.grid(
-            row=0, column=self.main_col, columnspan=2*self.main_col+1, rowspan=3, sticky="nsew", padx=5)
+            row=0, column=self.main_col, columnspan=2*self.main_col+1, rowspan=4, sticky="nsew", padx=5)
 
         self.status_msg_text.tag_config("INFO", foreground="black")
         self.status_msg_text.tag_config("WARNING", foreground="purple")

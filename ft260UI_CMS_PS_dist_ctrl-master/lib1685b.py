@@ -55,16 +55,16 @@ def getOVP(ser):
     return int(resp[0])/10.  
 
 def getData(ser):
-    """Get the current, voltage and state. Response is an array: [0] - Current, [1] - Voltage, [2] - state (0-cv, 1-cc)"""
+    """Get the current, voltage and state. Response is an array: [0] - VOLTAGE, [1] - CURRENT, [2] - state (0-cv, 1-cc)"""
     resp = spdQuery(ser, "GETD\r")
-    print(resp)
+    #print("volt: " + str(int(resp[0][0:3])/10.))
     return [int(resp[0][0:3])/10., int(resp[0][4:7])/10., int(chr(resp[0][8]))]
 
 def getSettings(ser):
     """Get the current, voltage and state. Response is an array: [0] - Current, [1] - Voltage""" #It isn't -- the voltage is getSettings(ser)[0]
     #It might be worthwhile to check all the other array outputs, since it seems like the order can be wrong.
     resp = spdQuery(ser, "GETS\r")
-    #print(resp)
+    #print("resp: " + str(resp))
     return [int(resp[0][0:3])/10., int(resp[0][3:6])/10.]
     
 def onOff(ser, state): #0 for on, 1 for off
