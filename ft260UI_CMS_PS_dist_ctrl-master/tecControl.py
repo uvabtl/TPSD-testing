@@ -38,3 +38,10 @@ def volt(voltage, t=5):
 
 #temp = sys.argv
 #volt(float(temp[1]), float(temp[2]))
+
+def off(t=5):
+    v0 = float(lib1685b.getSettings(ser)[0])
+    print("Powering down tecs")
+    stepVolt(ser, v0, 1, t, dt=0.25)
+    time.sleep((v0+0.01)/4)
+    lib1685b.onOff(ser, 1)
