@@ -537,20 +537,6 @@ class _PSDistCtrlFrame(tk.Frame):
 
     def msg_error(self, msg):
         self.add_status_msg("ERROR", msg)
-
-    def setAldoVolt():
-        inp = float(voltInpALDO.get())
-        if inp <= 50:
-            aldoControl.volt(inp, 5)
-        else:
-            print("ALDO voltage cannot be set higher than 50")
-
-    def setTecVolt():
-        inp = float(voltInpTEC.get())
-        if inp <= 36:
-            tecControl.volt(inp, 5)
-        else:
-            print("TEC voltage cannot exceed 36")
         
     def __init__(self, parent, config):
         self.parent = parent
