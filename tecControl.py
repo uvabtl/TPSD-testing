@@ -60,8 +60,8 @@ def volt(voltage, t=5):
         waitUntilVolt(ser, v1)
     elif v1 == v0:
         lib1685b.onOff(ser, 0)
-    elif v1 > 36:
-        print("TEC voltage cannot exceed 36V.")
+    elif v1 > 32:
+        print("TEC voltage cannot exceed 32V.")
     else:
         lib1685b.onOff(ser, 0)
         stepVolt(ser, v0, v1, t, dt)

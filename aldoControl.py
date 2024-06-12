@@ -33,8 +33,8 @@ def volt(voltage, t=5):
     v1 = float(voltage)
     if v1 > 0:
         lib1785b.outputOn(True, ser)
-    if v1 > 50:
-        print("ALDO voltage is limited at 50.")
+    if v1 > 48:
+        print("ALDO voltage is limited at 48.")
     elif v1 == v0:
         lib1785b.volt(v0, ser)
     elif v1 <= 0:
