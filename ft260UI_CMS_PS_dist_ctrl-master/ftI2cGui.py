@@ -619,7 +619,7 @@ class _PSDistCtrlFrame(tk.Frame):
 
         ramp = tk.StringVar()
         ramp_time_select = ttk.Combobox(self, width='5', justify='center', textvariable = ramp)
-        ramp_times = ('.25', '.5', '1.0', '2.5', '5', '10', '30')
+        ramp_times = ('0.25', '0.5', '1.0', '2.5', '5.0', '10', '30')
         ramp_time_select['values'] = ramp_times
         ramp_time_select['state'] = 'readonly'
         ramp_time_select.current(4)
