@@ -3,7 +3,7 @@ Repo to remotely control the power supplies and TPSD board from a GUI. Most of t
 
 To run the GUI without connecting to a board, disable the import statements for aldoControl, tecControl, and bpolControl in the ftI2gui file. The only major changes that have to be implemented to control all power sources at once are changing the ports named in the above files and enabling the second bPOL12 power supply in its control file, then uncommenting the import statements in the main ftI2gui file. The program is run from ftI2gui.py. Note that using the aldo/tec/bpol controls requires root access currently.
 
-The original README from Paolo's repo is below:
+The original README from Paolo's repo is below, with an additional section on setting up the power supply controls:
 ***
 # I2C Python3.6+ GUI for [FT260](https://www.ftdichip.com/Products/ICs/FT260.html) chip & CMS BTL power supply distribution board control
 
@@ -57,6 +57,11 @@ The GUI is built with tkinter library.
 * `pip install smbus2` (Linux only)
 * `python ftI2cGui.py`
 
+## Run Power Supply Controls
+
+* `pip install pyserial`
+* Find the USB ports connected to supplies, then change port names in the aldo/tec/bpol Control files
+  
 ## Build standalone application
 
 * `pip install PyInstaller`
