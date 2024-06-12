@@ -1,5 +1,7 @@
 # Function library for 1685B, 1686B, 1687B and 1688B power supplies
-#
+# I've noticed that the ordering of some outputs is wrong. Should check
+# all array outputs for consistency. There are also more print statements
+# than are necessary.
 
 currMult = 10
 voltMult = 10
@@ -60,6 +62,7 @@ def getData(ser):
 
 def getSettings(ser):
     """Get the current, voltage and state. Response is an array: [0] - Current, [1] - Voltage""" #It isn't -- the voltage is getSettings(ser)[0]
+    #It might be worthwhile to check all the other array outputs, since it seems like the order can be wrong.
     resp = spdQuery(ser, "GETS\r")
     #print(resp)
     return [int(resp[0][0:3])/10., int(resp[0][3:6])/10.]

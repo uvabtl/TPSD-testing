@@ -37,3 +37,9 @@ def volt(voltage, t=5):
         print("Setting voltage to " + str(voltage) + "V")
         lib1785b.outputOn(True, ser)
         stepVolt(ser, v0, v1, t, dt)
+
+def off(t=5):
+    print("Powering down aldos")
+    v0 = float(lib1785b.readAll(ser)['vset'])
+    stepVolt(ser, v0, 0, t, dt=0.25)
+    lib1785b.outputOn(False, ser)
