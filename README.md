@@ -1,5 +1,7 @@
 # TPSD-testing
-Repo to remotely control the power supplies and TPSD board from a GUI. Most of the GUI code was adapted from Paolo's repo, but new elements have been added for directly altering the input voltages. This also includes a ramp for changing the voltage over a set period of time. To run the GUI without connecting to a board, disable the import statements for aldoControl, tecControl, and bpolControl in the ftI2gui file. The only major changes that have to be implemented to control all power sources at once are changing the ports named in the above files and enabling the second bPOL12 power supply in its control file, then uncommenting the import statements in the main ftI2gui file. The program is run from ftI2gui.py.
+Repo to remotely control the power supplies and TPSD board from a GUI. Most of the GUI code was adapted from Paolo's repo, but new elements have been added for directly altering the input voltages. This also includes a ramp for changing the voltage over a set period of time. 
+
+To run the GUI without connecting to a board, disable the import statements for aldoControl, tecControl, and bpolControl in the ftI2gui file. The only major changes that have to be implemented to control all power sources at once are changing the ports named in the above files and enabling the second bPOL12 power supply in its control file, then uncommenting the import statements in the main ftI2gui file. The program is run from ftI2gui.py. Note that using the aldo/tec/bpol controls requires root access currently.
 
 The original README from Paolo's repo is below:
 ***
