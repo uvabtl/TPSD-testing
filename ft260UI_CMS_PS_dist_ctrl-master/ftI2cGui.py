@@ -537,6 +537,20 @@ class _PSDistCtrlFrame(tk.Frame):
 
     def msg_error(self, msg):
         self.add_status_msg("ERROR", msg)
+
+    def setAldoVolt():
+        inp = float(voltInpALDO.get())
+        if inp <= 50:
+            aldoControl.volt(inp, 5)
+        else:
+            print("ALDO voltage cannot be set higher than 50")
+
+    def setTecVolt():
+        inp = float(voltInpTEC.get())
+        if inp <= 36:
+            tecControl.volt(inp, 5)
+        else:
+            print("TEC voltage cannot exceed 36")
         
     def __init__(self, parent, config):
         self.parent = parent
@@ -571,8 +585,6 @@ class _PSDistCtrlFrame(tk.Frame):
             self.status_ru.append([])
             for i in range(self.ru_n+1):
                 self.label_ru[j].append(tk.Label(self, text=row_str[i]))
-                
-                # self.label_ru[j][-1].grid(row=4+i, column=0+j*self.main_col, sticky="nsew")
                 self.label_ru[j][-1].grid(row=5+i, column=0+j*self.main_col, sticky="nsew")
                 self.btn(True, j, i)
                 self.btn(False, j, i)
@@ -602,13 +614,25 @@ class _PSDistCtrlFrame(tk.Frame):
 
 # -----------------------------------------------------------------------------------------------------------
 
+        label_ramp_time = tk.Label(self, text="Ramp Time")
+        label_ramp_time.grid(row=3, column=3*self.main_col, sticky="nsew")
+
+        ramp = tk.StringVar()
+        ramp_time_select = ttk.Combobox(self, width='5', justify='center', textvariable = ramp)
+        ramp_times = ('.25', '.5', '1.0', '2.5', '5', '10', '30')
+        ramp_time_select['values'] = ramp_times
+        ramp_time_select['state'] = 'readonly'
+        ramp_time_select.current(4)
+        ramp_time_select.grid(row=4, column = 3*self.main_col, sticky="nsew")
+        ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
+        
         label_bPOL_ramp = tk.Label(self, text="bPOL Voltage")
         label_bPOL_ramp.grid(row=4, column=0, sticky="nsew")
 
         voltInpbPOL = tk.Text(self, width=1, height=1, pady=1)
         voltInpbPOL.grid(row=4, column=1, sticky="nsew")
 
-        button_bPOL_ramp = tk.Button(self, text="SET", command = lambda: bpolControl.volt(float(voltInpbPOL.get("1.0", "end-1c")), 5))
+        button_bPOL_ramp = tk.Button(self, text="SET", command = lambda: bpolControl.volt(float(voltInpbPOL.get("1.0", "end-1c")), float(ramp.get())))
         button_bPOL_ramp.grid(row=4, column=2, sticky="nsew")
 
         label_TEC_ramp = tk.Label(self, text="TEC Voltage")
@@ -617,7 +641,7 @@ class _PSDistCtrlFrame(tk.Frame):
         voltInpTEC = tk.Text(self, width=1, height=1, pady=1)
         voltInpTEC.grid(row=4, column=self.main_col+1, sticky="nsew")
 
-        button_TEC_ramp = tk.Button(self, text="SET", command = lambda: tecControl.volt(float(voltInpTEC.get("1.0", "end-1c")), 5))
+        button_TEC_ramp = tk.Button(self, text="SET", command = lambda: tecControl.volt(float(voltInpTEC.get("1.0", "end-1c")), float(ramp.get())))
         button_TEC_ramp.grid(row=4, column=self.main_col+2, sticky="nsew")
 
         label_ALDO_ramp = tk.Label(self, text="ALDO Voltage")
@@ -626,13 +650,13 @@ class _PSDistCtrlFrame(tk.Frame):
         voltInpALDO = tk.Text(self, width=1, height=1, pady=1)
         voltInpALDO.grid(row=4, column=2*self.main_col+1, sticky="nsew")
         
-        button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: aldoControl.volt(float(voltInpALDO.get("1.0", "end-1c")), 5))
+        button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: aldoControl.volt(float(voltInpALDO.get("1.0", "end-1c")), float(ramp.get())))
         button_ALDO_ramp.grid(row=4, column=2*self.main_col+2, sticky="nsew")
                 
 # -----------------------------------------------------------------------------------------------------------
         
         self.status_msg_text.grid(
-            row=0, column=self.main_col, columnspan=2*self.main_col, rowspan=3, sticky="nsew", padx=5)
+            row=0, column=self.main_col, columnspan=2*self.main_col+1, rowspan=3, sticky="nsew", padx=5)
 
         self.status_msg_text.tag_config("INFO", foreground="black")
         self.status_msg_text.tag_config("WARNING", foreground="purple")
