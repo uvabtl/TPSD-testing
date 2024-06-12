@@ -57,6 +57,11 @@ The GUI is built with tkinter library.
 * `pip install smbus2` (Linux only)
 * `python ftI2cGui.py`
 
+## Run Power Supply Controls
+
+* 'pip install pyserial'
+* Find the USB ports connected to supplies, then change port names in the aldo/tec/bpol Control files
+  
 ## Build standalone application
 
 * `pip install PyInstaller`
