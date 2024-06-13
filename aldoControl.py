@@ -19,6 +19,7 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
         lib1785b.volt(newV, ser)
         time.sleep(dt)
     lib1785b.volt(newV, ser)
+    lib1785b.volt(v1, ser)
 
 def waitUntilVolt(volt):
     while not abs(float(lib1785b.readAll(ser)['vset']) - volt) <= 0.2:
