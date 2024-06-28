@@ -10,8 +10,8 @@ from tkinter import font
 
 import lib1785b
 import lib1685b
-import aldoControl
-#import tecControl
+#import aldoControl
+import tecControl
 #import bpolControl
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
@@ -707,8 +707,7 @@ class _CommLog(tk.Frame):
         item = self.tree.insert('', 'end', text=str(self.message_number), values=v)
         self.message_number += 1
         self.tree.see(item)
-
-
+        
 def main():
 
     parent = tk.Tk()
@@ -737,7 +736,6 @@ def main():
     if not error:
         ctrl.init()
     parent.mainloop()
-
 
 if __name__ == "__main__":
     main()
