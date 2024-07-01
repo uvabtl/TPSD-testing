@@ -9,7 +9,7 @@ for index in range(len(li)):
 #choice = input("Which device?: ")
 #vi=rm.open_resource(li[int(choice)])
 vi=rm.open_resource(li[0])
-#print(vi.query("*idn?"))
+print(vi.query("syst:addr?"))
 
 def setVoltage(vi, v1):
     if int(v1) > 30:
@@ -18,6 +18,7 @@ def setVoltage(vi, v1):
         lib9130.setLowVoltage(v1, vi)
         
 def stepVolt(vi, v0, v1, t=5, dt=0.25):
+    v0 = float(lib9130.queryVoltage(vi))
     nt = t/dt
     dv = (v1-v0)/nt
     newV = v0
@@ -28,8 +29,9 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
     setVoltage(vi, v1)
 
 def diagnostic(vi):
-    lib9130.channelOn(1, vi)
-    lib9130.remoteMode(1, vi)
+    lib9130.channelOn(1, vi) #enables channel 1
+    lib9130.remoteMode(1, vi) # enables remote mode
+
     #lib9130.seriesMode(0, vi) # should try to test series mode
 
     lib9130.setVoltage(10, vi)
@@ -50,4 +52,14 @@ def diagnostic(vi):
     lib9130.remoteMode(0, vi) # disables remote mode
     lib9130.channelOff(1, vi) # disables channel 1
 
-diagnostic(vi)
+def tryQuery(vi):
+    lib9130.remoteMode(1, vi)
+
+    lib9130.channelOn(1, vi)
+    
+    #lib9130.setVoltage(10, vi)
+    print(lib9130.queryChannel(vi))
+
+#diagnostic(vi)
+tryQuery(vi)
+lib9130.seriesMode(0, vi)
