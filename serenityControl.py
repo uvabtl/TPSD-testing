@@ -25,15 +25,29 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
         newV = newV + dv
         setVoltage(vi, newV)
         time.sleep(dt)
-    setVoltage(ser, v1)
+    setVoltage(vi, v1)
 
+def diagnostic():
+    lib9130.channelOn(1, vi)
+    lib9130.remoteMode(1, vi)
+    #lib9130.seriesMode(0, vi) # should try to test series mode
+    
+    lib9130.setVoltage(10, vi)
+    time.sleep(3)
+    print(lib9130.queryVoltage(vi))
+    stepVolt(vi, 10, 24) # set voltage to 24 from 10, over 5 seconds
+    time.sleep(3)
 
-#vi.write("outp:stat 1")
-lib9130.channelOn(1, vi)
-lib9130.remoteMode(1, vi)
-#lib9130.seriesMode(0, vi)
-lib9130.setVoltage(10, vi)
-print(lib9130.queryVoltage(vi))
-#lib9130.setVoltageProt(50, vi)
-#lib9130.setVoltage(48, vi)
-#lib9130.remoteMode(0, vi)
+    lib9130.setVoltageProt(50, vi) # attemps to set voltage protection to 50
+    lib9130.setVoltage(48, vi) # attempts to set voltage to 48 (target)
+    time.sleep(3)
+
+    stepVolt(vi, 48, 30) # steps to 30V
+    time.sleep(3)
+    stepVolt(vi, 30, 0) # steps to 0V
+    time.sleep(3)
+
+    lib9130.remoteMode(0, vi) # disables remote mode
+    lib9130.channelOff(1, vi) # disables channel 1
+
+diagnostic()
