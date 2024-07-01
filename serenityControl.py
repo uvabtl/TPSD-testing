@@ -27,11 +27,11 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
         time.sleep(dt)
     setVoltage(vi, v1)
 
-def diagnostic():
+def diagnostic(vi):
     lib9130.channelOn(1, vi)
     lib9130.remoteMode(1, vi)
     #lib9130.seriesMode(0, vi) # should try to test series mode
-    
+
     lib9130.setVoltage(10, vi)
     time.sleep(3)
     print(lib9130.queryVoltage(vi))
@@ -50,4 +50,4 @@ def diagnostic():
     lib9130.remoteMode(0, vi) # disables remote mode
     lib9130.channelOff(1, vi) # disables channel 1
 
-diagnostic()
+diagnostic(vi)
