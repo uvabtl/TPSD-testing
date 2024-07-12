@@ -11,7 +11,7 @@ from tkinter import font
 import lib1785b
 import lib1685b
 #import aldoControl
-import tecControl
+#import tecControl
 #import bpolControl
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030

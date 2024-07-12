@@ -21,10 +21,14 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
     lib1785b.volt(newV, ser)
     lib1785b.volt(v1, ser)
 
-def waitUntilVolt(volt):
+def waitUntilVolt(volt, timeout=10):
+    counter = 0
     while not abs(float(lib1785b.readAll(ser)['vset']) - volt) <= 0.2:
         time.sleep(0.05)
-    
+        counter += 1
+        if counter >= 20*timeout: # timeout seconds
+            break
+        
 def volt(voltage, t=5):
     dt = 0.25 #length of time for each step in seconds
     data = lib1785b.readAll(ser)

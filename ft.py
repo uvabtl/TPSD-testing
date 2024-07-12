@@ -65,7 +65,6 @@ def find_device_in_paths_windows(vid, pid):
 
 
 def find_device_in_paths_linux(vid, pid):
-
     # Iterate through the /dev/i2c-n devices
     for i2c_device_number in range(99):  # Assuming you have 99 i2c-n devices, adjust as per your setup
         try:
