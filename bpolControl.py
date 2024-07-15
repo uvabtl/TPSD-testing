@@ -16,10 +16,14 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
         lib1685b.setVoltage(ser, newV)
         time.sleep(dt)
     lib1685b.setVoltage(ser, v1)
-
-def waitUntilVolt(ser, volt):
-    while not abs(lib1685b.getData(ser)[0] - volt) <= 0.2):
+    
+def waitUntilVolt(ser, volt, timeout=10):
+    counter = 0
+    while not abs(float(lib1685b.getData(ser)[0]) - volt) <= 0.2:
         time.sleep(0.05)
+        counter += 1
+        if counter >= 20*timeout: # timeout seconds
+            break
     
 def off(t=5):
     v0 = float(lib1685b.getSettings(ser1)[0])

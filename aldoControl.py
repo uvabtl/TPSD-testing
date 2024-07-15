@@ -21,7 +21,7 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
     lib1785b.volt(newV, ser)
     lib1785b.volt(v1, ser)
 
-def waitUntilVolt(volt, timeout=10):
+def waitUntilVolt(volt, ser, timeout=10):
     counter = 0
     while not abs(float(lib1785b.readAll(ser)['vset']) - volt) <= 0.2:
         time.sleep(0.05)
@@ -45,7 +45,7 @@ def volt(voltage, t=5):
     elif v1 <= 0:
         print("Setting ALDO voltage to 0V")
         stepVolt(ser, v0, v1, t, dt)
-        waitUntilVolt(0)
+        waitUntilVolt(0, ser)
         lib1785b.outputOn(False, ser)
     else:
         print("Setting ALDO voltage to " + str(voltage) + "V")
@@ -55,7 +55,7 @@ def volt(voltage, t=5):
 def onOff(on, t=5): #on == True for turning supply on, False for turning off
     v0 = float(lib1785b.readAll(ser)['vset'])
     isOn = ~lib1785b.readAll(ser)['output']
-    if (on and isOn) or (off and not isOn):
+    if (on and isOn) or (not on and not isOn):
         #already in desired state
         time.sleep(0.01)
     elif (on and not isOn):
@@ -63,7 +63,7 @@ def onOff(on, t=5): #on == True for turning supply on, False for turning off
         lib1785b.volt(0, ser)
         lib1785b.outputOn(True, ser)
         stepVolt(ser, 0, v0, t, dt=0.25)
-    elif (off and isOn):
+    elif (not on and isOn):
         print("Powering down ALDOs")
         stepVolt(ser, v0, 0, t, dt=0.25)
         lib1785b.outputOn(False, ser)
