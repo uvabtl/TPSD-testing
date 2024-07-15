@@ -28,6 +28,23 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
         time.sleep(dt)
     setVoltage(vi, v1)
 
+def volt(voltage, t=5):
+    dt = 0.25
+    v1 = float(voltage)
+    v0 = float(lib9130.queryVoltage(vi))
+    print("Setting Serenity voltage to " + str(v1))
+    if v1 == 0:
+        stepVolt(vi, v0, 0, t, dt)
+        time.sleep((v0+0.01) / 6)
+        lib9130.channelOff(1, vi)
+    elif v1 == v0:
+        lib9130.channelOn(1, vi)
+    elif v1 > 48:
+        print("Serenity voltage cannot exceed 48V.")
+    else:
+        lib9130.channelOn(1, vi)
+        stepVolt(vi, v0, v1, t, dt)
+
 def diagnostic(vi):
     lib9130.channelOn(1, vi) #enables channel 1
     lib9130.remoteMode(1, vi) # enables remote mode

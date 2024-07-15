@@ -10,11 +10,50 @@ from tkinter import font
 
 import lib1785b
 import lib1685b
+import lib9130
 #import aldoControl
 #import tecControl
 #import bpolControl
+#import serenityControl
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
+
+
+parent = tk.Tk()
+
+def open_Toplevel1():  
+    serBox = tk.Toplevel(parent)
+    serBox.title("Serenity Power Supply Control")
+    serBox.geometry("300x75")
+        
+    # Create label
+    fillerlabel = tk.Label(serBox, text = " \t ")
+    fillerlabel.grid(row=1, column = 3)
+    # Create Exit button
+    button1 = tk.Button(serBox, text = "Exit", command = serBox.destroy)
+
+    RampSerLabel = tk.Label(serBox, text="Ramp Time")
+    RampSerLabel.grid(row=1, column=4)
+
+    ramp = tk.StringVar()
+    ramp_time_select = ttk.Combobox(serBox, width='1', justify='center', textvariable = ramp, style="TCombobox")
+    ramp_times = ['0.25', '0.5', '1.0', '2.5', '5.0', '10', '30']
+    ramp_time_select['values'] = ramp_times
+    ramp_time_select.current(4)
+    ramp_time_select.grid(row=2, column = 4, sticky="nsew")
+    ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
+
+    voltInpSerLabel = tk.Label(serBox, text="Serenity Voltage")
+    voltInpSerLabel.grid(row=1, column=2)
+
+    voltInpSer = tk.Text(serBox, width=1, height=1, pady=5, bd=1)
+    voltInpSer.grid(row=2, column=2, sticky="nsew")
+
+    button_Ser_ramp = tk.Button(serBox, text="SET", command = lambda: serenityControl.stepVolt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
+    button_Ser_ramp.grid(row=2, column=1, sticky="nsew")
+        
+    # Display until closed manually
+    serBox.mainloop()   
 
 
 class _ConfigFrame(tk.Frame):
@@ -536,8 +575,8 @@ class _PSDistCtrlFrame(tk.Frame):
         self.add_status_msg("WARNING", msg)
 
     def msg_error(self, msg):
-        self.add_status_msg("ERROR", msg)
-        
+        self.add_status_msg("ERROR", msg)     
+
     def __init__(self, parent, config):
         self.parent = parent
         self.conf = config
@@ -641,6 +680,11 @@ class _PSDistCtrlFrame(tk.Frame):
         button_ALDO_ramp.grid(row=5, column=2*self.main_col+2, sticky="nsew")
                 
 # -----------------------------------------------------------------------------------------------------------
+
+        buttonTop = tk.Button(self, text="Serenity Control", command = open_Toplevel1)
+        buttonTop.grid(row=8, column=self.main_col*3, sticky='nsew')
+
+# -----------------------------------------------------------------------------------------------------------
         
         self.status_msg_text.grid(
             row=0, column=self.main_col, columnspan=2*self.main_col+1, rowspan=4, sticky="nsew", padx=5)
@@ -708,9 +752,11 @@ class _CommLog(tk.Frame):
         self.message_number += 1
         self.tree.see(item)
         
+
+
 def main():
 
-    parent = tk.Tk()
+    #parent = tk.Tk()
     parent.title("CMS BTL Power Supply Distribution Control")
     config = _ConfigFrame(parent)
     config.clock = "400"
@@ -733,6 +779,9 @@ def main():
     comm_log.pack(fill="both", expand=True)
     ft._callback = comm_log.add_new_log_entry
     error = config.open()
+
+
+
     if not error:
         ctrl.init()
     parent.mainloop()
