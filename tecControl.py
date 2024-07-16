@@ -25,6 +25,9 @@ def waitUntilVolt(ser, volt, timeout=10):
         if counter >= 20*timeout: # timeout seconds
             break
 
+def getVoltage():
+    return float(lib1685b.getData(ser)[0])
+
 def onOff(ser, on, t=5): #on == True for turning supply on, False for turning off
     v0 = float(lib1685b.getData(ser)[0])
     isOn = False if lib1685b.getData(ser)[0] == 0 else True

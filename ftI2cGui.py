@@ -8,6 +8,11 @@ import tkinter.ttk as ttk
 import tkinter.scrolledtext as tkst
 from tkinter import font
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import math
+import sys
+
 import lib1785b
 import lib1685b
 import lib9130
@@ -17,44 +22,6 @@ import lib9130
 #import serenityControl
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
-
-
-parent = tk.Tk()
-
-def open_Toplevel1():  
-    serBox = tk.Toplevel(parent)
-    serBox.title("Serenity Power Supply Control")
-    serBox.geometry("300x75")
-        
-    # Create label
-    fillerlabel = tk.Label(serBox, text = " \t ")
-    fillerlabel.grid(row=1, column = 3)
-    # Create Exit button
-    button1 = tk.Button(serBox, text = "Exit", command = serBox.destroy)
-
-    RampSerLabel = tk.Label(serBox, text="Ramp Time")
-    RampSerLabel.grid(row=1, column=4)
-
-    ramp = tk.StringVar()
-    ramp_time_select = ttk.Combobox(serBox, width='1', justify='center', textvariable = ramp, style="TCombobox")
-    ramp_times = ['0.25', '0.5', '1.0', '2.5', '5.0', '10', '30']
-    ramp_time_select['values'] = ramp_times
-    ramp_time_select.current(4)
-    ramp_time_select.grid(row=2, column = 4, sticky="nsew")
-    ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
-
-    voltInpSerLabel = tk.Label(serBox, text="Serenity Voltage")
-    voltInpSerLabel.grid(row=1, column=2)
-
-    voltInpSer = tk.Text(serBox, width=1, height=1, pady=5, bd=1)
-    voltInpSer.grid(row=2, column=2, sticky="nsew")
-
-    button_Ser_ramp = tk.Button(serBox, text="SET", command = lambda: serenityControl.stepVolt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
-    button_Ser_ramp.grid(row=2, column=1, sticky="nsew")
-        
-    # Display until closed manually
-    serBox.mainloop()   
-
 
 class _ConfigFrame(tk.Frame):
     @property
@@ -681,8 +648,11 @@ class _PSDistCtrlFrame(tk.Frame):
                 
 # -----------------------------------------------------------------------------------------------------------
 
-        buttonTop = tk.Button(self, text="Serenity Control", command = open_Toplevel1)
-        buttonTop.grid(row=8, column=self.main_col*3, sticky='nsew')
+        buttonSerWindow = tk.Button(self, text="Serenity Control", command = lambda: serenityFrame(parent))
+        buttonSerWindow.grid(row=8, column=self.main_col*3, sticky='nsew')
+
+        buttonVoltReadout = tk.Button(self, text="Voltage Readout", command = lambda: voltPlot(parent))
+        buttonVoltReadout.grid(row=12, column=self.main_col*3, sticky='nsew')
 
 # -----------------------------------------------------------------------------------------------------------
         
@@ -693,6 +663,104 @@ class _PSDistCtrlFrame(tk.Frame):
         self.status_msg_text.tag_config("WARNING", foreground="purple")
         self.status_msg_text.tag_config("ERROR", foreground="red")
 
+class serenityFrame(tk.Toplevel):
+    def __init__(self, parent):
+        self.parent = parent
+        tk.Toplevel.__init__(self)
+
+        self.title("Serenity Power Supply Control")
+        self.geometry("300x75")
+            
+        # Create label
+        fillerlabel = tk.Label(self, text = " \t ")
+        fillerlabel.grid(row=1, column = 3)
+
+        RampSerLabel = tk.Label(self, text="Ramp Time")
+        RampSerLabel.grid(row=1, column=4)
+
+        ramp = tk.StringVar()
+        ramp_time_select = ttk.Combobox(self, width='1', justify='center', textvariable = ramp, style="TCombobox")
+        ramp_times = ['0.25', '0.5', '1.0', '2.5', '5.0', '10', '30']
+        ramp_time_select['values'] = ramp_times
+        ramp_time_select.current(4)
+        ramp_time_select.grid(row=2, column = 4, sticky="nsew")
+        ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
+
+        voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
+        voltInpSerLabel.grid(row=1, column=2)
+
+        voltInpSer = tk.Text(self, width=1, height=1, pady=5, bd=1)
+        voltInpSer.grid(row=2, column=2, sticky="nsew")
+
+        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.stepVolt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
+        button_Ser_ramp.grid(row=2, column=4, sticky="nsew")
+
+        button_close = tk.Button(self, text="Close", command=self.destroy)
+        button_close.grid(row=4, column=5)
+        # Display until closed manually
+        self.mainloop()   
+
+class voltPlot(tk.Toplevel):
+    def __init__(self, parent):
+        self.parent = parent
+        tk.Toplevel.__init__(self)
+
+        self.title("Power Supply Voltage Plot")
+        self.geometry("500x500")
+
+        self.figure = Figure()
+        self.plt = self.figure.add_subplot()
+        canvas = FigureCanvasTkAgg(self.figure, self)
+        canvas.get_tk_widget().pack()
+        self.x = [0]
+        self.aldoFlag = False
+        self.tecFlag = False
+        self.bpolFlag = False
+        self.serenFlag = False
+
+        if 'aldoControl' in sys.modules: #test for ALDOs
+            self.aldoFlag = True
+            self.aldoVolt = [0]
+        if 'tecControl' in sys.modules:
+            self.tecFlag = True
+            self.tecVolt = [0]
+        if 'bpolControl' in sys.modules:
+            self.bpolFlag = True
+            self.bpol1Volt = [0]
+            self.bpol2Volt = [0]
+        if 'serenityControl' in sys.modules:
+            self.serenFlag = True
+            self.serenVolt = [0]
+        self.animate()
+
+    def animate(self):
+        self.x.append(self.x[-1] + 0.1)
+        self.plt.clear()
+        legend = []
+        if self.aldoFlag:
+            self.aldoVolt.append(aldoControl.getVoltage())
+            self.plt.plot(self.x[-100:], self.aldoVolt[-100:])
+            legend.append("ALDO Voltage")
+        if self.tecFlag:
+            self.tecVolt.append(tecControl.getVoltage())
+            self.plt.plot(self.x[-100:], self.tecVolt[-100:])
+            legend.append("TEC Voltage")
+        if self.bpolFlag:
+            self.bpol1Volt.append(bpolControl.getVoltage1())
+            self.bpol1Volt.append(bpolControl.getVoltage2())
+            self.plt.plot(self.x[-100:], self.bpol1Volt[-100:])
+            self.plt.plot(self.x[-100:], self.bpol2Volt[-100:])
+            legend.append("bPOL Voltage 1")
+            legend.append("bPOL Voltage 2")
+        if self.serenFlag:
+            self.serenVolt.append(serenityControl.getVoltage())
+            self.plt.plot(self.x[-100:], self.serenVolt[-100:])
+            legend.append("Serenity Voltage")
+
+        self.plt.set_title("Voltages over Time")
+        self.plt.legend(legend, loc=1)
+        self.figure.canvas.draw()
+        self.after(10, self.animate)
 
 class _CommLog(tk.Frame):
     """
@@ -756,7 +824,7 @@ class _CommLog(tk.Frame):
 
 def main():
 
-    #parent = tk.Tk()
+    parent = tk.Tk()
     parent.title("CMS BTL Power Supply Distribution Control")
     config = _ConfigFrame(parent)
     config.clock = "400"
@@ -779,9 +847,8 @@ def main():
     comm_log.pack(fill="both", expand=True)
     ft._callback = comm_log.add_new_log_entry
     error = config.open()
-
-
-
+    serenityWindow = serenityFrame(parent)
+    
     if not error:
         ctrl.init()
     parent.mainloop()

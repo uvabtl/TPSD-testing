@@ -28,6 +28,9 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
         time.sleep(dt)
     setVoltage(vi, v1)
 
+def getVoltage():
+    return lib9130.queryVoltage(vi)
+
 def volt(voltage, t=5):
     dt = 0.25
     v1 = float(voltage)

@@ -29,6 +29,9 @@ def waitUntilVolt(volt, ser, timeout=10):
         if counter >= 20*timeout: # timeout seconds
             break
         
+def getVoltage():
+    return float(lib1785b.readAll(ser)['vset'])
+
 def volt(voltage, t=5):
     dt = 0.25 #length of time for each step in seconds
     data = lib1785b.readAll(ser)
