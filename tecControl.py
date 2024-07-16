@@ -69,3 +69,4 @@ def volt(voltage, t=5):
 
 #temp = sys.argv
 #volt(float(temp[1]), float(temp[2]))
+#print(getVoltage())

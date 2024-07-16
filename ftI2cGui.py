@@ -1,3 +1,7 @@
+# Current issues: when closing main window, throws an error. This doesn't really
+# matter, since it is being closed anyway, but could be symptomatic of an issue elsewhere
+# Also can't read voltage while it is being changed
+# and doesn't properly load the board on startup
 from ft_function import FT260_STATUS, FT260_I2C_FLAG, FT260_I2C_STATUS
 import ft
 import time
@@ -17,7 +21,7 @@ import lib1785b
 import lib1685b
 import lib9130
 #import aldoControl
-#import tecControl
+import tecControl
 #import bpolControl
 #import serenityControl
 FT260_Vid = 0x0403
@@ -669,7 +673,7 @@ class serenityFrame(tk.Toplevel):
         tk.Toplevel.__init__(self)
 
         self.title("Serenity Power Supply Control")
-        self.geometry("300x75")
+        self.geometry("350x100")
             
         # Create label
         fillerlabel = tk.Label(self, text = " \t ")
@@ -692,8 +696,8 @@ class serenityFrame(tk.Toplevel):
         voltInpSer = tk.Text(self, width=1, height=1, pady=5, bd=1)
         voltInpSer.grid(row=2, column=2, sticky="nsew")
 
-        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.stepVolt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
-        button_Ser_ramp.grid(row=2, column=4, sticky="nsew")
+        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
+        button_Ser_ramp.grid(row=2, column=3, sticky="nsew")
 
         button_close = tk.Button(self, text="Close", command=self.destroy)
         button_close.grid(row=4, column=5)
@@ -727,7 +731,7 @@ class voltPlot(tk.Toplevel):
         if 'bpolControl' in sys.modules:
             self.bpolFlag = True
             self.bpol1Volt = [0]
-            self.bpol2Volt = [0]
+            #self.bpol2Volt = [0]
         if 'serenityControl' in sys.modules:
             self.serenFlag = True
             self.serenVolt = [0]
@@ -739,22 +743,22 @@ class voltPlot(tk.Toplevel):
         legend = []
         if self.aldoFlag:
             self.aldoVolt.append(aldoControl.getVoltage())
-            self.plt.plot(self.x[-100:], self.aldoVolt[-100:])
+            self.plt.plot(self.x[-400:], self.aldoVolt[-400:])
             legend.append("ALDO Voltage")
         if self.tecFlag:
             self.tecVolt.append(tecControl.getVoltage())
-            self.plt.plot(self.x[-100:], self.tecVolt[-100:])
+            self.plt.plot(self.x[-400:], self.tecVolt[-400:])
             legend.append("TEC Voltage")
         if self.bpolFlag:
             self.bpol1Volt.append(bpolControl.getVoltage1())
-            self.bpol1Volt.append(bpolControl.getVoltage2())
-            self.plt.plot(self.x[-100:], self.bpol1Volt[-100:])
-            self.plt.plot(self.x[-100:], self.bpol2Volt[-100:])
+            #self.bpol2Volt.append(bpolControl.getVoltage2())
+            self.plt.plot(self.x[-400:], self.bpol1Volt[-400:])
+            #self.plt.plot(self.x[-400:], self.bpol2Volt[-400:])
             legend.append("bPOL Voltage 1")
-            legend.append("bPOL Voltage 2")
+            #legend.append("bPOL Voltage 2")
         if self.serenFlag:
             self.serenVolt.append(serenityControl.getVoltage())
-            self.plt.plot(self.x[-100:], self.serenVolt[-100:])
+            self.plt.plot(self.x[-400:], self.serenVolt[-400:])
             legend.append("Serenity Voltage")
 
         self.plt.set_title("Voltages over Time")
@@ -847,7 +851,6 @@ def main():
     comm_log.pack(fill="both", expand=True)
     ft._callback = comm_log.add_new_log_entry
     error = config.open()
-    serenityWindow = serenityFrame(parent)
     
     if not error:
         ctrl.init()

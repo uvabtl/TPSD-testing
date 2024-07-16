@@ -57,6 +57,7 @@ def getOVP(ser):
 def getData(ser):
     """Get the current, voltage and state. Response is an array: [0] - VOLTAGE, [1] - CURRENT, [2] - state (0-cv, 1-cc)"""
     resp = spdQuery(ser, "GETD\r")
+    #print(resp)
     #print("volt: " + str(int(resp[0][0:3])/10.))
     return [int(resp[0][0:3])/10., int(resp[0][4:7])/10., int(chr(resp[0][8]))]
 

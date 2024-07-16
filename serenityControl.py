@@ -4,12 +4,14 @@ import lib9130
 
 rm=visa.ResourceManager()
 li=rm.list_resources()
-for index in range(len(li)):
-    print(str(index)+" - "+li[index])
+#print(li)
+#for index in range(len(li)):
+#    print(str(index)+" - "+li[index])
 #choice = input("Which device?: ")
 #vi=rm.open_resource(li[int(choice)])
-vi=rm.open_resource(li[0])
-print(vi.query("syst:addr?"))
+#vi=rm.open_resource(li[-1])
+vi = rm.open_resource("ASRL/dev/ttyUSB0::INSTR")
+#print(vi.query("syst:addr?"))
 
 def setVoltage(vi, v1):
     if int(v1) > 30:
@@ -29,7 +31,7 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
     setVoltage(vi, v1)
 
 def getVoltage():
-    return lib9130.queryVoltage(vi)
+    return float(lib9130.queryVoltage(vi))
 
 def volt(voltage, t=5):
     dt = 0.25
@@ -73,12 +75,12 @@ def diagnostic(vi):
     lib9130.channelOff(1, vi) # disables channel 1
 
 def tryQuery(vi):
-    lib9130.remoteMode(1, vi)
+    lib9130.remoteMode(vi)
 
     lib9130.channelOn(1, vi)
     
     #lib9130.setVoltage(10, vi)
-    print(lib9130.queryChannel(vi))
+    #print(lib9130.queryChannel(vi))
 
 #diagnostic(vi)
 tryQuery(vi)
