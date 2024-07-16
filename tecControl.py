@@ -2,6 +2,7 @@ import serial
 import sys
 import time
 import lib1685b
+
 ser = serial.Serial("/dev/ttyUSB0") #Note that this uses the same port as the ALDOs.
 # This has to be fixed before trying to control both simultaneously.
 ser.timeout = 0.1
@@ -16,22 +17,21 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
         time.sleep(dt)
     lib1685b.setVoltage(ser, v1)
 
-def waitUntilVolt(ser, volt):
-    while not abs(lib1685b.getData(ser)[0] - volt) <= 0.2:
+def waitUntilVolt(ser, volt, timeout=10):
+    counter = 0
+    while not abs(float(lib1685b.getData(ser)[0]) - volt) <= 0.2:
         time.sleep(0.05)
+        counter += 1
+        if counter >= 20*timeout: # timeout seconds
+            break
 
-def off(t=5):
-    v0 = float(lib1685b.getSettings(ser)[0])
-    print("Powering down TECs")
-    stepVolt(ser, v0, 1, t, dt=0.25)
-    waitUntilVolt(ser, 1)
-    lib1685b.onOff(ser, 1)
-    waitUntilVolt(ser, 0)
+def getVoltage():
+    return float(lib1685b.getData(ser)[0])
 
-def onOff(on, t=5): #on == True for turning supply on, False for turning off
+def onOff(ser, on, t=5): #on == True for turning supply on, False for turning off
     v0 = float(lib1685b.getData(ser)[0])
     isOn = False if lib1685b.getData(ser)[0] == 0 else True
-    if (on and isOn) or (off and not isOn):
+    if (on and isOn) or (not on and not isOn):
         #already in desired state
         time.sleep(0.01)
     elif (on and not isOn):

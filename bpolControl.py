@@ -5,7 +5,7 @@ import lib1685b
 
 ser1 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #Note that this uses the same port as the ALDOs.
 # This has to be fixed before trying to control both simultaneously.
-#ser2 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #This port is for the second bPOL12V power supply. It should be changed when a new USB port is made available
+ser2 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #This port is for the second bPOL12V power supply. It should be changed when a new USB port is made available
 
 def stepVolt(ser, v0, v1, t=5, dt=0.25):
     nt = t/dt
@@ -16,10 +16,14 @@ def stepVolt(ser, v0, v1, t=5, dt=0.25):
         lib1685b.setVoltage(ser, newV)
         time.sleep(dt)
     lib1685b.setVoltage(ser, v1)
-
-def waitUntilVolt(ser, volt):
-    while not abs(lib1685b.getData(ser)[0] - volt) <= 0.2):
+    
+def waitUntilVolt(ser, volt, timeout=10):
+    counter = 0
+    while not abs(float(lib1685b.getData(ser)[0]) - volt) <= 0.2:
         time.sleep(0.05)
+        counter += 1
+        if counter >= 20*timeout: # timeout seconds
+            break
     
 def off(t=5):
     v0 = float(lib1685b.getSettings(ser1)[0])
@@ -30,6 +34,12 @@ def off(t=5):
     lib1685b.onOff(ser1, 1)
     #lib1685b.onOff(ser2, 1)
     
+def getVoltage1():
+    return float(lib1685b.getData(ser1)[0])
+
+def getVoltage2():
+    return float(lib1685b.getData(ser2)[0])
+
 def volt(voltage, t=5):
     args = sys.argv
     dt = 0.25

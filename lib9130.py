@@ -10,21 +10,18 @@ I can edit the voltage protection in the supply, but I am not able to increase t
 '''
 
 def command(command, vi): vi.write(command)
-def query(command, vi):
-    return vi.query(command)
+def query(command, vi): return vi.query(command) #returns output of the query
+
+def localMode(vi): command("SYST:LOC", vi)
+def remoteMode(vi): command("SYST:REM", vi)
 
 def setActiveChannel(channel, vi): command("inst:nsel " + str(channel), vi)
-
-def remoteMode(state, vi): #turns remote mode on/off, depending on state
-    # 0 for off, 1 for on
-    cmd = "syst:rem" if state else "syst:loc"
-    command(cmd, vi)
 
 def seriesMode(state, vi): #turns series mode on/off (from 1/0)
     command("inst:com:trac NONE", vi)
     command("inst:com:para NONE", vi)
-    cmd = "outp:ser?"  #this one doesn't work
-    query(cmd, vi)
+    cmd = "outp:ser" if state else "inst:com:ser NONE" #this one doesn't work
+    command(cmd, vi)
     
 def channelOn(channel, vi): # input is "1", "2", or "3"
     setActiveChannel(channel, vi)
@@ -46,6 +43,11 @@ def setVoltageProt(volt, vi):
     cmd = "volt:prot " + str(volt) + "V, volt prot MAX"
     command(cmd, vi)
 
+def queryOnOff(channel, vi):
+    setActiveChannel(channel, vi)
+    cmd = "OUTP?"
+    return query(cmd, vi)
+
 def queryVoltage(vi):
     cmd = "meas:volt?"
     return query(cmd, vi)
@@ -55,5 +57,5 @@ def queryProt(vi):
     return query(cmd, vi)
     
 def queryChannel(vi):
-    cmd = "inst?"
+    cmd = "inst:nsel?"
     return query(cmd, vi)
