@@ -1,7 +1,5 @@
-# Current issues: when closing main window, throws an error. This doesn't really
-# matter, since it is being closed anyway, but could be symptomatic of an issue elsewhere
-# Also can't read voltage while it is being changed
-# and doesn't properly load the board on startup
+# Current issues: can't read voltage while it is being changed
+# and sometimes doesn't properly load the board on startup (fixed by hitting "init board")
 from ft_function import FT260_STATUS, FT260_I2C_FLAG, FT260_I2C_STATUS
 import ft
 import time
@@ -21,7 +19,7 @@ import lib1785b
 import lib1685b
 import lib9130
 #import aldoControl
-import tecControl
+#import tecControl
 #import bpolControl
 #import serenityControl
 FT260_Vid = 0x0403
@@ -656,7 +654,7 @@ class _PSDistCtrlFrame(tk.Frame):
         buttonSerWindow.grid(row=8, column=self.main_col*3, sticky='nsew')
 
         buttonVoltReadout = tk.Button(self, text="Voltage Readout", command = lambda: voltPlot(parent))
-        buttonVoltReadout.grid(row=12, column=self.main_col*3, sticky='nsew')
+        buttonVoltReadout.grid(row=9, column=self.main_col*3, sticky='nsew')
 
 # -----------------------------------------------------------------------------------------------------------
         
@@ -721,6 +719,17 @@ class voltPlot(tk.Toplevel):
         self.tecFlag = False
         self.bpolFlag = False
         self.serenFlag = False
+        self.placeholderFlag = False
+
+        # points / minute: ~1114, rate is nonconstant
+        # at 2 minutes, 2244 points, so 1122 pts/min
+        # at 5 minutes, 5545 points, so 1109 pts/min
+        # seems to hover at about 1110 pts/min calling the loop with after(10)
+
+        # calling with after(1) gives 1088 pts in 30 seconds, so 2176 pts/min
+        # with after(100) gives 193 pts / 30 seconds = 386 pts/min
+
+        self.MAX_POINTS = 150 # number of points displayed on the plot
 
         if 'aldoControl' in sys.modules: #test for ALDOs
             self.aldoFlag = True
@@ -731,40 +740,64 @@ class voltPlot(tk.Toplevel):
         if 'bpolControl' in sys.modules:
             self.bpolFlag = True
             self.bpol1Volt = [0]
-            #self.bpol2Volt = [0]
+            self.bpol2Volt = [0]
         if 'serenityControl' in sys.modules:
             self.serenFlag = True
             self.serenVolt = [0]
+        if not self.aldoFlag and not self.tecFlag and not self.bpolFlag and not self.serenFlag:
+            self.placeholderFlag = True
+            self.placeholder = [0]
+
+        self.time = time.time()
         self.animate()
 
     def animate(self):
-        self.x.append(self.x[-1] + 0.1)
+        #self.x.append(self.x[-1] + 0.1)
+        self.x.append(float(time.time()) - float(self.time))
+        if len(self.x) > 5*self.MAX_POINTS:
+            self.x = self.x[-self.MAX_POINTS:]
+            if self.aldoFlag:
+                self.aldoVolt = self.aldoVolt[-self.MAX_POINTS:]
+            if self.tecFlag:
+                self.tecVolt = self.tecVolt[-self.MAX_POINTS:]
+            if self.bpolFlag:
+                self.bpol1Volt = self.bpol1Volt[-self.MAX_POINTS:]
+                self.bpol2Volt = self.bpol2Volt[-self.MAX_POINTS:]
+            if self.serenFlag:
+                self.serenVolt = self.serenVolt[-self.MAX_POINTS:]
+
         self.plt.clear()
         legend = []
         if self.aldoFlag:
             self.aldoVolt.append(aldoControl.getVoltage())
-            self.plt.plot(self.x[-400:], self.aldoVolt[-400:])
+            self.plt.plot(self.x[-self.MAX_POINTS:], self.aldoVolt[-self.MAX_POINTS:])
             legend.append("ALDO Voltage")
         if self.tecFlag:
             self.tecVolt.append(tecControl.getVoltage())
-            self.plt.plot(self.x[-400:], self.tecVolt[-400:])
+            self.plt.plot(self.x[-self.MAX_POINTS:], self.tecVolt[-self.MAX_POINTS:])
             legend.append("TEC Voltage")
         if self.bpolFlag:
             self.bpol1Volt.append(bpolControl.getVoltage1())
-            #self.bpol2Volt.append(bpolControl.getVoltage2())
-            self.plt.plot(self.x[-400:], self.bpol1Volt[-400:])
-            #self.plt.plot(self.x[-400:], self.bpol2Volt[-400:])
+            self.bpol2Volt.append(bpolControl.getVoltage2())
+            self.plt.plot(self.x[-self.MAX_POINTS:], self.bpol1Volt[-self.MAX_POINTS:])
+            self.plt.plot(self.x[-self.MAX_POINTS:], self.bpol2Volt[-self.MAX_POINTS:])
             legend.append("bPOL Voltage 1")
-            #legend.append("bPOL Voltage 2")
+            legend.append("bPOL Voltage 2")
         if self.serenFlag:
             self.serenVolt.append(serenityControl.getVoltage())
-            self.plt.plot(self.x[-400:], self.serenVolt[-400:])
+            self.plt.plot(self.x[-self.MAX_POINTS:], self.serenVolt[-self.MAX_POINTS:])
             legend.append("Serenity Voltage")
+        if self.placeholderFlag:
+            self.placeholder.append(math.sin(self.x[-1]))
+            self.plt.plot(self.x[-self.MAX_POINTS:], self.placeholder[-self.MAX_POINTS:])
+            legend.append("Placeholder")
 
         self.plt.set_title("Voltages over Time")
-        self.plt.legend(legend, loc=1)
+        self.plt.legend(legend, loc=2)
+        self.plt.set_xlabel("Time (s)")
+        self.plt.set_ylabel("Voltage (V)")
         self.figure.canvas.draw()
-        self.after(10, self.animate)
+        self.after(5, self.animate)
 
 class _CommLog(tk.Frame):
     """
