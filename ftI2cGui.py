@@ -674,31 +674,31 @@ class serenityFrame(tk.Toplevel):
         self.geometry("350x100")
             
         # Create label
+        voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
+        voltInpSerLabel.grid(row=0, column=0)
+
+        voltInpSer = tk.Text(self, width=1, height=1, pady=5, bd=1)
+        voltInpSer.grid(row=1, column=0, sticky="nsew")
+
         fillerlabel = tk.Label(self, text = " \t ")
-        fillerlabel.grid(row=1, column = 3)
+        fillerlabel.grid(row=0, column = 2)
 
         RampSerLabel = tk.Label(self, text="Ramp Time")
-        RampSerLabel.grid(row=1, column=4)
+        RampSerLabel.grid(row=0, column=3)
 
         ramp = tk.StringVar()
         ramp_time_select = ttk.Combobox(self, width='1', justify='center', textvariable = ramp, style="TCombobox")
         ramp_times = ['0.25', '0.5', '1.0', '2.5', '5.0', '10', '30']
         ramp_time_select['values'] = ramp_times
         ramp_time_select.current(4)
-        ramp_time_select.grid(row=2, column = 4, sticky="nsew")
+        ramp_time_select.grid(row=1, column = 3, sticky="nsew")
         ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
 
-        voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
-        voltInpSerLabel.grid(row=1, column=2)
-
-        voltInpSer = tk.Text(self, width=1, height=1, pady=5, bd=1)
-        voltInpSer.grid(row=2, column=2, sticky="nsew")
-
         button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
-        button_Ser_ramp.grid(row=2, column=3, sticky="nsew")
+        button_Ser_ramp.grid(row=1, column=1, sticky="nsew")
 
         button_close = tk.Button(self, text="Close", command=self.destroy)
-        button_close.grid(row=4, column=5)
+        button_close.grid(row=2, column=4, sticky='nsew')
         # Display until closed manually
         self.mainloop()   
 
