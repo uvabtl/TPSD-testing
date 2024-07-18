@@ -18,10 +18,22 @@ import sys
 import lib1785b
 import lib1685b
 import lib9130
-#import aldoControl
-#import tecControl
-#import bpolControl
-#import serenityControl
+try:
+    import aldoControl
+except: # should be configured to specific errors
+    pass
+try:
+    import tecControl
+except:
+    pass
+try:
+    import bpolControl
+except:
+    pass
+try:
+    import serenityControl
+except:
+    pass
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
 
@@ -647,7 +659,7 @@ class _PSDistCtrlFrame(tk.Frame):
         
         button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: aldoControl.volt(float(voltInpALDO.get("1.0", "end-1c")), float(ramp.get())))
         button_ALDO_ramp.grid(row=5, column=2*self.main_col+2, sticky="nsew")
-                
+        
 # -----------------------------------------------------------------------------------------------------------
 
         buttonSerWindow = tk.Button(self, text="Serenity Control", command = lambda: serenityFrame(parent))
@@ -672,7 +684,7 @@ class serenityFrame(tk.Toplevel):
 
         self.title("Serenity Power Supply Control")
         self.geometry("350x100")
-            
+        
         # Create label
         voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
         voltInpSerLabel.grid(row=0, column=0)
@@ -700,7 +712,7 @@ class serenityFrame(tk.Toplevel):
         button_close = tk.Button(self, text="Close", command=self.destroy)
         button_close.grid(row=2, column=4, sticky='nsew')
         # Display until closed manually
-        self.mainloop()   
+        self.mainloop()
 
 class voltPlot(tk.Toplevel):
     def __init__(self, parent):
