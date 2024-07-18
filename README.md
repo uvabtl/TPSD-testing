@@ -83,14 +83,17 @@ ALDO Power: BK 1787B Power Supply
   * VID: 0x067b
   * PID: 0x2303
   * Display Name: Prolific Technology, Inc. PL2303 Serial Port / Mobile Action MA-8910P
+
 TEC Power: BK 1687B Power Supply
   * VID: 0x10c4
   * PID: 0xea60
   * Display Name: Silicon Labs CP210x UART Bridge
+
 bPOL Power: BK 1688b Power Supply
   * VID: 0x10c4
   * PID: 0xea60
   * Display Name: Silicon Labs CP210x UART Bridge
+
 Serenity Power: BK 9130 Power Supply
   * VID: 0x067b
   * PID: 0x2303
