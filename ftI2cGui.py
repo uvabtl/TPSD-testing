@@ -15,9 +15,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import math
 import sys
 
-import lib1785b
-import lib1685b
-import lib9130
 try:
     import aldoControl
 except: # should be configured to specific errors
@@ -34,6 +31,7 @@ try:
     import serenityControl
 except:
     pass
+
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
 
