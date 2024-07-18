@@ -80,20 +80,23 @@ Using Linux can cause the USB connection to the ft260 chip to fail. In the most 
 The power supplies are attached via USB. Once several are connected at once, it will be important to detect which is which automatically. Each one is listed here with VID and PID for identification.
 
 ALDO Power: BK 1787B Power Supply
-  VID: 0x067b
-  PID: 0x2303
-  Display Name: Prolific Technology, Inc. PL2303 Serial Port / Mobile Action MA-8910P
+  * VID: 0x067b
+  * PID: 0x2303
+  * Display Name: Prolific Technology, Inc. PL2303 Serial Port / Mobile Action MA-8910P
+
 TEC Power: BK 1687B Power Supply
-  VID: 0x10c4
-  PID: 0xea60
-  Display Name: Silicon Labs CP210x UART Bridge
+  * VID: 0x10c4
+  * PID: 0xea60
+  * Display Name: Silicon Labs CP210x UART Bridge
+
 bPOL Power: BK 1688b Power Supply
-  VID: 0x10c4
-  PID: 0xea60
-  Display Name: Silicon Labs CP210x UART Bridge
+  * VID: 0x10c4
+  * PID: 0xea60
+  * Display Name: Silicon Labs CP210x UART Bridge
+
 Serenity Power: BK 9130 Power Supply
-  VID: 0x067b
-  PID: 0x2303
-  Display Name: Prolific Technology, Inc. PL2303 Serial Port / Mobile Action MA-8910P
+  * VID: 0x067b
+  * PID: 0x2303
+  * Display Name: Prolific Technology, Inc. PL2303 Serial Port / Mobile Action MA-8910P
 
 These were read off of the output of `lsusb` in the terminal; it seems likely that they are the USB cords connecting the computer to the devices. This is why the ALDOs appear to match the Serenity power supply; they have the same USB adapter connected to them.
