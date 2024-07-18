@@ -15,13 +15,23 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import math
 import sys
 
-import lib1785b
-import lib1685b
-import lib9130
-#import aldoControl
-#import tecControl
-#import bpolControl
-#import serenityControl
+try:
+    import aldoControl
+except: # should be configured to specific errors
+    pass
+try:
+    import tecControl
+except:
+    pass
+try:
+    import bpolControl
+except:
+    pass
+try:
+    import serenityControl
+except:
+    pass
+
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
 
@@ -647,7 +657,7 @@ class _PSDistCtrlFrame(tk.Frame):
         
         button_ALDO_ramp = tk.Button(self, text="SET", command = lambda: aldoControl.volt(float(voltInpALDO.get("1.0", "end-1c")), float(ramp.get())))
         button_ALDO_ramp.grid(row=5, column=2*self.main_col+2, sticky="nsew")
-                
+        
 # -----------------------------------------------------------------------------------------------------------
 
         buttonSerWindow = tk.Button(self, text="Serenity Control", command = lambda: serenityFrame(parent))
@@ -672,35 +682,35 @@ class serenityFrame(tk.Toplevel):
 
         self.title("Serenity Power Supply Control")
         self.geometry("350x100")
-            
+        
         # Create label
+        voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
+        voltInpSerLabel.grid(row=0, column=0)
+
+        voltInpSer = tk.Text(self, width=1, height=1, pady=5, bd=1)
+        voltInpSer.grid(row=1, column=0, sticky="nsew")
+
         fillerlabel = tk.Label(self, text = " \t ")
-        fillerlabel.grid(row=1, column = 3)
+        fillerlabel.grid(row=0, column = 2)
 
         RampSerLabel = tk.Label(self, text="Ramp Time")
-        RampSerLabel.grid(row=1, column=4)
+        RampSerLabel.grid(row=0, column=3)
 
         ramp = tk.StringVar()
         ramp_time_select = ttk.Combobox(self, width='1', justify='center', textvariable = ramp, style="TCombobox")
         ramp_times = ['0.25', '0.5', '1.0', '2.5', '5.0', '10', '30']
         ramp_time_select['values'] = ramp_times
         ramp_time_select.current(4)
-        ramp_time_select.grid(row=2, column = 4, sticky="nsew")
+        ramp_time_select.grid(row=1, column = 3, sticky="nsew")
         ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
 
-        voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
-        voltInpSerLabel.grid(row=1, column=2)
-
-        voltInpSer = tk.Text(self, width=1, height=1, pady=5, bd=1)
-        voltInpSer.grid(row=2, column=2, sticky="nsew")
-
         button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
-        button_Ser_ramp.grid(row=2, column=3, sticky="nsew")
+        button_Ser_ramp.grid(row=1, column=1, sticky="nsew")
 
         button_close = tk.Button(self, text="Close", command=self.destroy)
-        button_close.grid(row=4, column=5)
+        button_close.grid(row=2, column=4, sticky='nsew')
         # Display until closed manually
-        self.mainloop()   
+        self.mainloop()
 
 class voltPlot(tk.Toplevel):
     def __init__(self, parent):
@@ -729,7 +739,8 @@ class voltPlot(tk.Toplevel):
         # calling with after(1) gives 1088 pts in 30 seconds, so 2176 pts/min
         # with after(100) gives 193 pts / 30 seconds = 386 pts/min
 
-        self.MAX_POINTS = 150 # number of points displayed on the plot
+        self.timelimit = 10 # seconds displayed on the x-axis
+        self.MAX_POINTS = self.timelimit * 50
 
         if 'aldoControl' in sys.modules: #test for ALDOs
             self.aldoFlag = True
@@ -796,6 +807,7 @@ class voltPlot(tk.Toplevel):
         self.plt.legend(legend, loc=2)
         self.plt.set_xlabel("Time (s)")
         self.plt.set_ylabel("Voltage (V)")
+        self.plt.set_xlim([float(time.time()-self.time) - self.timelimit, float(time.time()-self.time)])
         self.figure.canvas.draw()
         self.after(5, self.animate)
 
