@@ -1,11 +1,49 @@
 import serial
+import serial.tools.list_ports
 import sys
 import time
 import lib1685b
 
-ser1 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #Note that this uses the same port as the ALDOs.
+def find_bPOLs(vidTarget, pidTarget):
+    sers = []
+    for portRead in serial.tools.list_ports.comports():
+        if portRead[2] != 'n/a':
+            #print(f"{portRead[0]}: {portRead[2]}")
+            vidpid = portRead[2].split(' ')[1].split('=')[1]
+            vid = hex(int("0x"+vidpid.split(':')[0], 16))
+            pid = hex(int("0x"+vidpid.split(':')[1], 16))
+            #print(f"{vid}: {pid}")
+            if vid==hex(vidTarget) and pid==hex(pidTarget):
+                port=portRead[0]
+                ser = serial.Serial(port)
+                ser.timeout = 0.1
+                vMax = lib1685b.getMaxVoltCurr(ser)[0]
+                if vMax < 25:
+                    sers.append(ser)
+                else:
+                    ser.close()
+    if len(sers) > 0:
+        return sers
+    raise Exception("Could not find bpol PS")
+
+vidTarget = 0x10c4
+pidTarget = 0xea60
+sers = find_bPOLs(vidTarget, pidTarget)
+ser1 = sers[0]
+if len(sers) > 1:
+    ser2 = sers[1]
+
+def occupiedPort():
+    if len(sers) == 1:
+        name = ser1.name
+        return name
+    if len(sers) == 2:
+        name = [ser1.name, ser2.name]
+        return name
+    
+#ser1 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #Note that this uses the same port as the ALDOs.
 # This has to be fixed before trying to control both simultaneously.
-ser2 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #This port is for the second bPOL12V power supply. It should be changed when a new USB port is made available
+#ser2 = serial.Serial("/dev/ttyUSB0", timeout=0.1) #This port is for the second bPOL12V power supply. It should be changed when a new USB port is made available
 
 def stepVolt(ser, v0, v1, t=5, dt=0.25):
     nt = t/dt

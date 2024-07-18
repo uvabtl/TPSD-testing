@@ -1,11 +1,41 @@
 import serial
+import serial.tools.list_ports
 import sys
 import time
 import lib1685b
 
-ser = serial.Serial("/dev/ttyUSB0") #Note that this uses the same port as the ALDOs.
+#ser = serial.Serial("/dev/ttyUSB0") #Note that this uses the same port as the ALDOs.
 # This has to be fixed before trying to control both simultaneously.
+#ser.timeout = 0.1
+
+def find_TEC(vidTarget, pidTarget):
+    for portRead in serial.tools.list_ports.comports():
+        if portRead[2] != 'n/a':
+            #print(f"{portRead[0]}: {portRead[2]}")
+            vidpid = portRead[2].split(' ')[1].split('=')[1]
+            vid = hex(int("0x"+vidpid.split(':')[0], 16))
+            pid = hex(int("0x"+vidpid.split(':')[1], 16))
+            #print(f"{vid}: {pid}")
+            if vid==hex(vidTarget) and pid==hex(pidTarget):
+                port=portRead[0]
+                ser = serial.Serial(port)
+                ser.timeout=0.1
+                vMax = lib1685b.getMaxVoltCurr(ser)[0]
+                if vMax >= 25:
+                    return ser
+                else:
+                    ser.close()
+    raise Exception("Could not find TEC PS")
+
+vidTarget = 0x10c4
+pidTarget = 0xea60
+ser = find_TEC(vidTarget, pidTarget)
 ser.timeout = 0.1
+#print(lib1685b.getMaxVoltCurr(ser))
+
+def occupiedPort():
+    name = ser.name
+    return name
 
 def stepVolt(ser, v0, v1, t=5, dt=0.25):
     nt = t/dt
@@ -66,7 +96,3 @@ def volt(voltage, t=5):
         lib1685b.onOff(ser, 0)
         stepVolt(ser, v0, v1, t, dt)
         waitUntilVolt(ser, v1)
-
-#temp = sys.argv
-#volt(float(temp[1]), float(temp[2]))
-#print(getVoltage())

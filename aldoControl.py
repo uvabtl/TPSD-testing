@@ -1,14 +1,42 @@
 import serial
+import serial.tools.list_ports
 import sys
 import lib1785b
 import time
+import ft
 
-port = "/dev/ttyUSB0"
-ser = serial.Serial(port) # "/dev/ttyUSB0", "com2" etc...
+#port = "/dev/ttyUSB0"
+#ser = serial.Serial(port) # "/dev/ttyUSB0", "com2" etc...
 #should define the serial as the port connected to ALDO supply
-lib1785b.remoteMode(True, ser)
-# v0 = float(lib1785b.readAll(ser)['vset'])
-# stepVolt(ser, v0, 0, t=1, dt=0.25) #sets voltage to 0 on startup
+#lib1785b.remoteMode(True, ser)
+
+def find_ALDO(vidTarget, pidTarget):
+    for portRead in serial.tools.list_ports.comports():
+        if portRead[2] != 'n/a':
+            #print(f"{portRead[0]}: {portRead[2]}")
+            vidpid = portRead[2].split(' ')[1].split('=')[1]
+            vid = hex(int("0x"+vidpid.split(':')[0], 16))
+            pid = hex(int("0x"+vidpid.split(':')[1], 16))
+            #print(f"{vid}: {pid}")
+            if vid==hex(vidTarget) and pid==hex(pidTarget):
+                port=portRead[0]
+                ser = serial.Serial(port)
+                ser.timeout = 0.1
+                try:
+                    lib1785b.remoteMode(True, ser)
+                    return ser
+                except:
+                    ser.close()
+                    pass
+    raise Exception("Could not find ALDO PS")
+
+vidTarget = 0x067b
+pidTarget = 0x2303
+ser = find_ALDO(vidTarget, pidTarget)
+
+def occupiedPort():
+    name = ser.name
+    return name
 
 def stepVolt(ser, v0, v1, t=5, dt=0.25):
     nt = t/dt

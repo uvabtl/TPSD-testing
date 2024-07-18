@@ -45,7 +45,7 @@ def getComm(ser):
 def getMaxVoltCurr(ser):
     """Get the maximum voltage and current from the supply. The response is an array: [0] = voltage, [1] = current"""
     resp = spdQuery(ser, "GMAX\r")
-    print(resp)
+    #print(resp)
     return [int(resp[0][0:3])/10., int(resp[0][3:5])/10.]  
 
 def getOVP(ser):

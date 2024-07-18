@@ -16,20 +16,29 @@ import math
 import sys
 
 try:
+    import serenityControl
+    print(f"found Serenity at {serenityControl.occupiedPort()}")
+except Exception as error:
+    print("Couldn't find Serenity")
+    print("Error code: ", error)
+    pass
+try:
     import aldoControl
+    print(f"found ALDOs at {aldoControl.occupiedPort()}")
 except: # should be configured to specific errors
+    print("Couldn't find ALDOs")
     pass
 try:
     import tecControl
+    print(f"found TECs at {tecControl.occupiedPort()}")
 except:
+    print("Couldn't find TECs")
     pass
 try:
     import bpolControl
+    print(f"found bPOLs at {bpolControl.occupiedPort()}")
 except:
-    pass
-try:
-    import serenityControl
-except:
+    print("Couldn't find bPOLs")
     pass
 
 FT260_Vid = 0x0403
