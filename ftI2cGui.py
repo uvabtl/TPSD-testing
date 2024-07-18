@@ -739,7 +739,8 @@ class voltPlot(tk.Toplevel):
         # calling with after(1) gives 1088 pts in 30 seconds, so 2176 pts/min
         # with after(100) gives 193 pts / 30 seconds = 386 pts/min
 
-        self.MAX_POINTS = 150 # number of points displayed on the plot
+        self.timelimit = 10 # seconds displayed on the x-axis
+        self.MAX_POINTS = self.timelimit * 50
 
         if 'aldoControl' in sys.modules: #test for ALDOs
             self.aldoFlag = True
@@ -806,6 +807,7 @@ class voltPlot(tk.Toplevel):
         self.plt.legend(legend, loc=2)
         self.plt.set_xlabel("Time (s)")
         self.plt.set_ylabel("Voltage (V)")
+        self.plt.set_xlim([float(time.time()-self.time) - self.timelimit, float(time.time()-self.time)])
         self.figure.canvas.draw()
         self.after(5, self.animate)
 
