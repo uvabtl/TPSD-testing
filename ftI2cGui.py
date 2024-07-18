@@ -1,5 +1,8 @@
 # Current issues: can't read voltage while it is being changed
 # and sometimes doesn't properly load the board on startup (fixed by hitting "init board")
+# Serenity is currently broken, voltage command can be executed from serenityControl but not the GUI
+# Can be changed from the command line if necessary with "sudo python -c "import serenityControl; serenityControl.volt(v1, t)"
+
 from ft_function import FT260_STATUS, FT260_I2C_FLAG, FT260_I2C_STATUS
 import ft
 import time
@@ -17,7 +20,8 @@ import sys
 
 try:
     import serenityControl
-    print(f"found Serenity at {serenityControl.occupiedPort()}")
+    serenityTempAddr = "ASRL/dev/ttyUSB0::INSTR"
+    print(f"found Serenity at {serenityTempAddr}")
 except Exception as error:
     print("Couldn't find Serenity")
     print("Error code: ", error)
