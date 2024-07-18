@@ -3,6 +3,8 @@ Repo to remotely control the power supplies and TPSD board from a GUI. Most of t
 
 To run the GUI without connecting to a board, disable the import statements for aldoControl, tecControl, and bpolControl in the ftI2gui file. The only major changes that have to be implemented to control all power sources at once are changing the ports named in the above files and enabling the second bPOL12 power supply in its control file, then uncommenting the import statements in the main ftI2gui file. The program is run from ftI2gui.py. Note that using the aldo/tec/bpol controls requires root access currently.
 
+In addition, new GUI elements are also added to control the power supply correponding to the Serenity. This supply is currently a BK 9130, but this might be changed in the future so as to allow for remote control of the power supply's series mode. A new window was added to control the Serenity, as it didn't make sense to add Serenity control directly to the TPSD elements, since the Serenity only connects to one of the readout units. Also added was a live plot of all the power supplies' voltages.
+
 The original README from Paolo's repo is below, with an additional section on setting up the power supply controls:
 ***
 # I2C Python3.6+ GUI for [FT260](https://www.ftdichip.com/Products/ICs/FT260.html) chip & CMS BTL power supply distribution board control
@@ -16,7 +18,8 @@ The power supplies are 3 (current consumption per RU):
 * bPOL12V supply: <12 V, 4 A 
 * TEC supply: max 32 V, 1 A
 * ALDO supply: max 48 V, 0.1 A
-
+The Serenity power supply is (attached to only 1 RU at a time):
+* Serenity supply: max 48 V, 3 A
 ## Functionality (generic I2C use)
 
 I2C address scanner. It shows 7 bit addresses that acknowledge themselves on the bus.
@@ -41,6 +44,8 @@ The individual (`RU#`) `ON` or `OFF` buttons configure the corresponding switch.
 The general `ALL PS&RU` and `ALL PS&RU` buttons configure all switches on the board, or all switches on a specific
 power supply.
 
+The voltage blank fields in each column allow for a voltage to be entered for each power supply, which is then applied to the system with the 'SET' buttons. This is changed over time, according to the setting of the 'ramp' dropdown. All three power supplies for the TPSD board share the same ramp setting, and the Serenity control has its own ramp dropdown.
+
 ### IMPORTANT
 
 The ALDO switches cannot be toggled (by hardware) if the input power supply is above 3 V.
@@ -50,6 +55,8 @@ If the user tries to do that, a warning appears and the setting is not applied.
 
 Windows (fully tested) or Linux (beta support). Python 64-bit is required on Windows.
 The GUI is built with tkinter library.
+
+Using Linux can cause the USB connection to the ft260 chip to fail. In the most recent case, this was due to an update to the kernel.
 
 ## Run Gui
 
