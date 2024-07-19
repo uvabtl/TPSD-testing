@@ -1,7 +1,7 @@
 # Current issues: can't read voltage while it is being changed
 # and sometimes doesn't properly load the board on startup (fixed by hitting "init board")
-# Serenity is currently broken, voltage command can be executed from serenityControl but not the GUI
-# Can be changed from the command line if necessary with "sudo python -c "import serenityControl; serenityControl.volt(v1, t)"
+# Serenity and ALDOs are mutually exclusive currently, I think that the port is being overwritten in the ALDO code for /dev/ttyUSB0
+# Can be changed from the command line if necessary with "sudo python -c "import serenityControl; serenityControl.volt(v1, t)""
 
 from ft_function import FT260_STATUS, FT260_I2C_FLAG, FT260_I2C_STATUS
 import ft
@@ -17,34 +17,67 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import math
 import sys
+import serial
+from serial.tools.list_ports import comports
 
-try:
-    import serenityControl
-    serenityTempAddr = "ASRL/dev/ttyUSB0::INSTR"
-    print(f"found Serenity at {serenityTempAddr}")
-except Exception as error:
-    print("Couldn't find Serenity")
-    print("Error code: ", error)
-    pass
-try:
-    import aldoControl
-    print(f"found ALDOs at {aldoControl.occupiedPort()}")
-except: # should be configured to specific errors
-    print("Couldn't find ALDOs")
-    pass
-try:
-    import tecControl
-    print(f"found TECs at {tecControl.occupiedPort()}")
-except:
-    print("Couldn't find TECs")
-    pass
-try:
-    import bpolControl
-    print(f"found bPOLs at {bpolControl.occupiedPort()}")
-except:
-    print("Couldn't find bPOLs")
-    pass
+def readPowerSupplies():
+    # The reload functionality doesn't properly clear the USB devices.
+    # New PS units get added to dev/ttyUSB1, ttyUSB2, ... instead of
+    # being assigned to the old port they were in before.
+    # This is picked up until reaching dev/ttyUSB3, where the 'old' PS
+    # is found at the original dev/ttyUSB0, but the unit is actually plugged in
+    # at dev/tty/USB3.
+    global aldoControl
+    global tecControl
+    global bpolControl
+    global serenityControl
 
+    for port in comports():
+        print(port)
+        if "USB" in str(port):
+            portName = str(port).split(' - ')[0]
+            print(portName)
+            testPort = serial.Serial(portName)
+            testPort.close()
+            
+    if "aldoControl" in sys.modules: del aldoControl
+    if "tecControl" in sys.modules: del tecControl
+    if "bpolControl" in sys.modules: del bpolControl
+    if "serenityControl" in sys.modules: del serenityControl
+    
+    try:
+        import serenityControl
+        serenityPort = serenityControl.getSerenity()
+        print(f"found Serenity at {serenityPort.resource_info.resource_name}")
+        print(f"Init. voltage: {serenityControl.getVoltage(serenityPort)}")
+    except Exception as error:
+        print("Couldn't find Serenity")
+        print("Error code: ", error)
+        pass
+    
+
+    try:
+        import aldoControl
+        print(f"found ALDOs at {aldoControl.occupiedPort()}")
+    except: # should be configured to specific errors
+        print("Couldn't find ALDOs")
+        pass
+
+    try:
+        import tecControl
+        print(f"found TECs at {tecControl.occupiedPort()}")
+    except:
+        print("Couldn't find TECs")
+        pass
+    try:
+        import bpolControl
+        print(f"found bPOLs at {bpolControl.occupiedPort()}")
+    except:
+        print("Couldn't find bPOLs")
+        pass
+#if False: #disabled until fixed
+
+#readPowerSupplies()
 FT260_Vid = 0x0403
 FT260_Pid = 0x6030
 
@@ -679,6 +712,9 @@ class _PSDistCtrlFrame(tk.Frame):
         buttonVoltReadout = tk.Button(self, text="Voltage Readout", command = lambda: voltPlot(parent))
         buttonVoltReadout.grid(row=9, column=self.main_col*3, sticky='nsew')
 
+        buttonReloadPS = tk.Button(self, text="Reload PS", command = lambda: readPowerSupplies())
+        buttonReloadPS.grid(row=12, column=self.main_col*3, sticky='nsew')
+        
 # -----------------------------------------------------------------------------------------------------------
         
         self.status_msg_text.grid(
@@ -717,7 +753,7 @@ class serenityFrame(tk.Toplevel):
         ramp_time_select.grid(row=1, column = 3, sticky="nsew")
         ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
 
-        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
+        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(serenityPort, float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
         button_Ser_ramp.grid(row=1, column=1, sticky="nsew")
 
         button_close = tk.Button(self, text="Close", command=self.destroy)
@@ -885,7 +921,6 @@ class _CommLog(tk.Frame):
 
 
 def main():
-
     parent = tk.Tk()
     parent.title("CMS BTL Power Supply Distribution Control")
     config = _ConfigFrame(parent)
@@ -915,4 +950,5 @@ def main():
     parent.mainloop()
 
 if __name__ == "__main__":
+    readPowerSupplies()
     main()

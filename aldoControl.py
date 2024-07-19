@@ -13,21 +13,27 @@ import ft
 def find_ALDO(vidTarget, pidTarget):
     for portRead in serial.tools.list_ports.comports():
         if portRead[2] != 'n/a':
-            #print(f"{portRead[0]}: {portRead[2]}")
             vidpid = portRead[2].split(' ')[1].split('=')[1]
             vid = hex(int("0x"+vidpid.split(':')[0], 16))
             pid = hex(int("0x"+vidpid.split(':')[1], 16))
-            #print(f"{vid}: {pid}")
             if vid==hex(vidTarget) and pid==hex(pidTarget):
-                port=portRead[0]
-                ser = serial.Serial(port)
-                ser.timeout = 0.1
                 try:
-                    lib1785b.remoteMode(True, ser)
-                    return ser
+                    port=portRead[0]
+                    ser = serial.Serial(port)
+                    #print(ser)
+                    ser.timeout = 0.1
+                    id = lib1785b.readID(ser)
+                    if id["model"] == '682':
+                        return ser
+                    else:
+                        #print("closed")
+                        ser.close()
                 except:
+                    #print("Close")
                     ser.close()
+                    print(ser.name)
                     pass
+    ser.close()
     raise Exception("Could not find ALDO PS")
 
 vidTarget = 0x067b
@@ -98,3 +104,4 @@ def onOff(on, t=5): #on == True for turning supply on, False for turning off
         print("Powering down ALDOs")
         stepVolt(ser, v0, 0, t, dt=0.25)
         lib1785b.outputOn(False, ser)
+
