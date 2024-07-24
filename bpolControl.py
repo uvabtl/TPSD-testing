@@ -35,7 +35,7 @@ if len(sers) > 1:
 
 def occupiedPort():
     if len(sers) == 1:
-        name = ser1.name
+        name = [ser1.name]
         return name
     if len(sers) == 2:
         name = [ser1.name, ser2.name]
@@ -64,13 +64,12 @@ def waitUntilVolt(ser, volt, timeout=10):
             break
     
 def off(t=5):
-    v0 = float(lib1685b.getSettings(ser1)[0])
-    print("Powering down bpol supplies.")
-    stepVolt(ser1, v0, 1, t, dt=0.25)
-    #stepVolt(ser2, v0, 1, t, dt=0.25)
-    time.sleep((v0+0.01)/4)
-    lib1685b.onOff(ser1, 1)
-    #lib1685b.onOff(ser2, 1)
+    for ser in sers:
+        v0 = float(lib1685b.getSettings(ser1)[0])
+        print("Powering down bpol supplies.")
+        stepVolt(ser, v0, 1, t, dt=0.25)
+        time.sleep((v0+0.01)/4)
+        lib1685b.onOff(ser, 1)
     
 def getVoltage1():
     return float(lib1685b.getData(ser1)[0])
@@ -79,31 +78,24 @@ def getVoltage2():
     return float(lib1685b.getData(ser2)[0])
 
 def volt(voltage, t=5):
-    args = sys.argv
-    dt = 0.25
-    v1 = float(voltage)
-    v0 = float(lib1685b.getSettings(ser1)[0])
+    for ser in sers:
+        dt = 0.25
+        v1 = float(voltage)
+        v0 = float(lib1685b.getSettings(ser)[0])
 
-    print("Setting bPOL voltage to " + str(v1))
-    if v1 == 0:
-        stepVolt(ser1, v0, 1, t, dt)
-#        stepVolt(ser2, v0, 1, t, dt)
-        time.sleep((v0+0.01) / 6)
-        lib1685b.onOff(ser1, 1)
-#        lib1685b.onOff(ser2, 1)
-        waitUntilVolt(ser1, 0)
-#        waitUntilVolt(ser2, 0)
-    elif v1 == v0:
-        lib1685b.onOff(ser1, 0)
-#        lib1685b.onOff(ser2, 0)
-    elif v1 > 12:
-        print("bPOL voltage cannot exceed 12V.")
-    else:
-        lib1685b.onOff(ser1, 0)
-#        lib1685b.onOff(ser2, 0)
-        stepVolt(ser1, v0, v1, t, dt)
-#        stepVolt(ser2, v0, v1, t, dt)
-        waitUntilVolt(ser1, v1) #Should already be done by the time ser2 has run
-#        waitUntilVolt(ser2, v2)
-#temp = sys.argv
-#volt(float(temp[1]), float(temp[2]))
+        print(f"Setting bPOL {sers.index(ser)+1} voltage to {str(v1)}")
+        if v1 == 0:
+            stepVolt(ser, v0, 1, t, dt)
+            time.sleep((v0+0.01) / 6)
+            lib1685b.onOff(ser, 1)
+            waitUntilVolt(ser, 0)
+        elif v1 == v0:
+            lib1685b.onOff(ser, 0)
+        elif v1 > 12:
+            print("bPOL voltage cannot exceed 12V.")
+        else:
+            lib1685b.onOff(ser, 0)
+            stepVolt(ser, v0, v1, t, dt)
+            waitUntilVolt(ser, v1)
+
+

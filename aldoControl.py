@@ -24,6 +24,7 @@ def find_ALDO(vidTarget, pidTarget):
                     ser.timeout = 0.1
                     id = lib1785b.readID(ser)
                     if id["model"] == '682':
+                        #print("Found")
                         return ser
                     else:
                         #print("closed")
@@ -33,12 +34,14 @@ def find_ALDO(vidTarget, pidTarget):
                     ser.close()
                     print(ser.name)
                     pass
+    #print("Closed")
     ser.close()
     raise Exception("Could not find ALDO PS")
 
 vidTarget = 0x067b
 pidTarget = 0x2303
 ser = find_ALDO(vidTarget, pidTarget)
+lib1785b.remoteMode(True, ser)
 
 def occupiedPort():
     name = ser.name
@@ -104,4 +107,3 @@ def onOff(on, t=5): #on == True for turning supply on, False for turning off
         print("Powering down ALDOs")
         stepVolt(ser, v0, 0, t, dt=0.25)
         lib1785b.outputOn(False, ser)
-

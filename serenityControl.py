@@ -7,24 +7,29 @@ import lib9130
 def getSerenity(): # This has to be changed in order to set Serenity port manually.
     rm=visa.ResourceManager()
     li=rm.list_resources()
-    print(li)
-    flag = False
+    #print(li)
     for dev in li:
-        try:
-            vi = rm.open_resource(dev)
-            id = vi.query("*IDN?")
-            vendor = id.split(",")[0]
-            product = id.split(",")[1]
-            #print(id)
-            if vendor=="BK" and product=="9130":
-                print(vi)
-                return vi
-        except:
-            pass
+        if "USB" in dev:
+            try:
+                #print(f"Trying {dev}")
+                vi = rm.open_resource(dev)
+                id = vi.query("*IDN?")
+                print(id)
+                vendor = id.split(",")[0]
+                product = id.split(",")[1]
+                if vendor=="BK" and product=="9130":
+                    print(vi)
+                    lib9130.remoteMode(vi)
+                    return vi
+            except:
+                pass
     raise Exception("Couldn't find Serenity")
 
-
+vi = getSerenity()
 #vi = rm.open_resource("ASRL/dev/ttyUSB0::INSTR")
+
+def occupiedPort():
+    return vi.resource_info.resource_name
 
 def setVoltage(vi, v1):
     if int(v1) > 30:
@@ -39,18 +44,18 @@ def stepVolt(vi, v0, v1, t=5, dt=0.25):
     newV = v0
     for i in range(int(nt)):
         newV = newV + dv
-        print(f"Stepping to {newV}")
+        #print(f"Stepping to {newV}")
         setVoltage(vi, newV)
         time.sleep(dt)
     setVoltage(vi, v1)
 
-def getVoltage(vi):
+def getVoltage():
     return float(lib9130.queryVoltage(vi))
 
-def volt(vi, voltage, t=5):
+def volt(voltage, t=5):
     dt = 0.25
     v1 = float(voltage)
-    print(f"querying voltage of {vi}")
+    #print(f"querying voltage of {vi}")
     v0 = float(lib9130.queryVoltage(vi))
     print(f"Setting Serenity voltage to {v1} from {v0}")
     if v1 == 0:
@@ -103,10 +108,13 @@ def tryQuery(vi):
 
     lib9130.channelOn(1, vi)
     
-    #lib9130.setVoltage(10, vi)
-    #print(lib9130.queryChannel(vi))
+    lib9130.setVoltage(10, vi)
+    print(lib9130.queryChannel(vi))
+    print(f"Voltage: {getVoltage(vi)}")
 
 #global vi
+#rm=visa.ResourceManager()
+#vi = rm.open_resource("ASRL/dev/ttyUSB0::INSTR")
 #vi = getSerenity()
 #diagnostic(vi)
 #tryQuery(vi)

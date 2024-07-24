@@ -31,31 +31,34 @@ def readPowerSupplies():
     global tecControl
     global bpolControl
     global serenityControl
-
+    ''' #closes all ports in pyserial. shouldn't be necessary
     for port in comports():
-        print(port)
+        #print(port)
         if "USB" in str(port):
             portName = str(port).split(' - ')[0]
-            print(portName)
+            #print(portName)
             testPort = serial.Serial(portName)
             testPort.close()
-            
+        for i in range(99):
+            portName = f"/dev/ttyUSB{i}"
+            try:
+                testPort = serial.Serial(portName)
+                testPort.close()
+            except:
+                pass
+    '''
     if "aldoControl" in sys.modules: del aldoControl
     if "tecControl" in sys.modules: del tecControl
     if "bpolControl" in sys.modules: del bpolControl
     if "serenityControl" in sys.modules: del serenityControl
-    
+    print("Starting imports")
     try:
         import serenityControl
-        serenityPort = serenityControl.getSerenity()
-        print(f"found Serenity at {serenityPort.resource_info.resource_name}")
-        print(f"Init. voltage: {serenityControl.getVoltage(serenityPort)}")
+        print(f"found Serenity at {serenityControl.occupiedPort()}")
     except Exception as error:
         print("Couldn't find Serenity")
         print("Error code: ", error)
         pass
-    
-
     try:
         import aldoControl
         print(f"found ALDOs at {aldoControl.occupiedPort()}")
@@ -730,7 +733,7 @@ class serenityFrame(tk.Toplevel):
         tk.Toplevel.__init__(self)
 
         self.title("Serenity Power Supply Control")
-        self.geometry("350x100")
+        self.geometry("500x100")
         
         # Create label
         voltInpSerLabel = tk.Label(self, text="Serenity Voltage")
@@ -753,7 +756,7 @@ class serenityFrame(tk.Toplevel):
         ramp_time_select.grid(row=1, column = 3, sticky="nsew")
         ramp_time_select.option_add('*TCombobox*Listbox.Justify', 'center')
 
-        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(serenityPort, float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
+        button_Ser_ramp = tk.Button(self, text="SET", command = lambda: serenityControl.volt(float(voltInpSer.get("1.0", "end-1c")), float(ramp.get())))
         button_Ser_ramp.grid(row=1, column=1, sticky="nsew")
 
         button_close = tk.Button(self, text="Close", command=self.destroy)
@@ -788,7 +791,8 @@ class voltPlot(tk.Toplevel):
         # calling with after(1) gives 1088 pts in 30 seconds, so 2176 pts/min
         # with after(100) gives 193 pts / 30 seconds = 386 pts/min
 
-        self.timelimit = 10 # seconds displayed on the x-axis
+        #self.timelimit = 10 # seconds displayed on the x-axis
+        self.timelimit = 30
         self.MAX_POINTS = self.timelimit * 50
 
         if 'aldoControl' in sys.modules: #test for ALDOs
@@ -822,31 +826,46 @@ class voltPlot(tk.Toplevel):
                 self.tecVolt = self.tecVolt[-self.MAX_POINTS:]
             if self.bpolFlag:
                 self.bpol1Volt = self.bpol1Volt[-self.MAX_POINTS:]
-                self.bpol2Volt = self.bpol2Volt[-self.MAX_POINTS:]
+                if len(bpolControl.occupiedPort()) > 1:
+                    self.bpol2Volt = self.bpol2Volt[-self.MAX_POINTS:]
             if self.serenFlag:
                 self.serenVolt = self.serenVolt[-self.MAX_POINTS:]
 
         self.plt.clear()
         legend = []
         if self.aldoFlag:
-            self.aldoVolt.append(aldoControl.getVoltage())
-            self.plt.plot(self.x[-self.MAX_POINTS:], self.aldoVolt[-self.MAX_POINTS:])
-            legend.append("ALDO Voltage")
+            try:
+                self.aldoVolt.append(aldoControl.getVoltage())
+                self.plt.plot(self.x[-self.MAX_POINTS:], self.aldoVolt[-self.MAX_POINTS:])
+                legend.append("ALDO Voltage")
+            except:
+                pass
         if self.tecFlag:
-            self.tecVolt.append(tecControl.getVoltage())
-            self.plt.plot(self.x[-self.MAX_POINTS:], self.tecVolt[-self.MAX_POINTS:])
-            legend.append("TEC Voltage")
+            try:
+                self.tecVolt.append(tecControl.getVoltage())
+                self.plt.plot(self.x[-self.MAX_POINTS:], self.tecVolt[-self.MAX_POINTS:])
+                legend.append("TEC Voltage")
+            except:
+                pass
         if self.bpolFlag:
-            self.bpol1Volt.append(bpolControl.getVoltage1())
-            self.bpol2Volt.append(bpolControl.getVoltage2())
-            self.plt.plot(self.x[-self.MAX_POINTS:], self.bpol1Volt[-self.MAX_POINTS:])
-            self.plt.plot(self.x[-self.MAX_POINTS:], self.bpol2Volt[-self.MAX_POINTS:])
-            legend.append("bPOL Voltage 1")
-            legend.append("bPOL Voltage 2")
+            try:
+                self.bpol1Volt.append(bpolControl.getVoltage1())
+                self.plt.plot(self.x[-self.MAX_POINTS:], self.bpol1Volt[-self.MAX_POINTS:])
+                legend.append("bPOL Voltage 1")
+                if len(bpolControl.occupiedPort()) > 1:
+                    self.bpol2Volt.append(bpolControl.getVoltage2())
+                    self.plt.plot(self.x[-self.MAX_POINTS:], self.bpol2Volt[-self.MAX_POINTS:])
+                    legend.append("bPOL Voltage 2")
+            except:
+                pass
         if self.serenFlag:
-            self.serenVolt.append(serenityControl.getVoltage())
-            self.plt.plot(self.x[-self.MAX_POINTS:], self.serenVolt[-self.MAX_POINTS:])
-            legend.append("Serenity Voltage")
+            try:
+                self.serenVolt.append(serenityControl.getVoltage())
+                self.plt.plot(self.x[-self.MAX_POINTS:], self.serenVolt[-self.MAX_POINTS:])
+                legend.append("Serenity Voltage")
+            except Exception as error:
+                print(f"Didn't work, {error}")
+                pass
         if self.placeholderFlag:
             self.placeholder.append(math.sin(self.x[-1]))
             self.plt.plot(self.x[-self.MAX_POINTS:], self.placeholder[-self.MAX_POINTS:])
